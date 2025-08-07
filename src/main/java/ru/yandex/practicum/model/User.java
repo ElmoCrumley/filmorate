@@ -8,12 +8,12 @@ import java.time.LocalDate;
 
 @Data
 public class User {
-    Long id;
+    private Long id;
     @Email
-    String email;
+    private String email;
     @NotNull
-    String login;
-    String name;
+    private String login;
+    private String name;
     @NotNull
-    LocalDate birthday;
+    private LocalDate birthday;
 }
