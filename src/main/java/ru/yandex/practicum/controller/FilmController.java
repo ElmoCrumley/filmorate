@@ -29,11 +29,6 @@ public class FilmController {
     public Film include(@Valid @RequestBody Film film) {
 
         log.debug("Validation is starting");
-        if (film.getName() == null || film.getName().isBlank()) {
-            log.error("Exception, the name is null");
-            throw new ValidationException("Название не может быть пустым");
-        }
-
         if (film.getDescription().length() > 200) {
             log.error("Exception, description's length is more that 200");
             throw new ValidationException("Максимальная длина описания — 200 символов");
@@ -43,11 +38,6 @@ public class FilmController {
                 || film.getReleaseDate().isAfter(LocalDate.now())) {
             log.error("Exception, the date of release is before December 28, 1895.");
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
-        }
-
-        if (film.getDuration() < 0) {
-            log.error("Exception, the duration of film is negative value");
-            throw new ValidationException("Продолжительность фильма должна быть положительным числом");
         }
         log.debug("Validation is passed");
 
