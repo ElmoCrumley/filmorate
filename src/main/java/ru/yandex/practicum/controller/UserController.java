@@ -29,14 +29,9 @@ public class UserController {
     public User create(@Valid @RequestBody User user) {
 
         log.debug("Validation is starting");
-        if (!user.getEmail().contains("@")) {
-            log.error("Exception, email is empty or doesn't contain @");
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
-        }
-
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            log.error("Exception, name is empty or contains \" \"");
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
+        if (user.getLogin().contains(" ")) {
+            log.error("Exception, name is contains \" \"");
+            throw new ValidationException("Логин не может содержать пробелы");
         }
 
         if (user.getName() == null || user.getName().isBlank()) {
