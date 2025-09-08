@@ -1,9 +1,11 @@
 package ru.yandex.practicum.storage;
 
 import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.exception.ValidationException;
 import ru.yandex.practicum.model.User;
@@ -13,8 +15,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@RestController
 @Slf4j
 @Component
+@Getter
 public class InMemoryUserStorage  implements UserStorage {
 
     private final Map<Long, User> users = new HashMap<>();
@@ -83,7 +87,7 @@ public class InMemoryUserStorage  implements UserStorage {
 
     @Override
     public User delete(@Valid @RequestBody User user) {
-        return new User();
+        return user;
     }
 
     private long getNextId() {
