@@ -1,5 +1,6 @@
 package ru.yandex.practicum.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
@@ -20,28 +21,19 @@ public class UserService {
             this.inMemoryUserStorage = inMemoryUserStorage;
         }
 
-    public void addFriend(
-            Long id,
-            Long friendId
-    ) {
-
+    public void addFriend(Long id, Long friendId) {
         inMemoryUserStorage.getUsers().get(id).getFriends().add(friendId);
         inMemoryUserStorage.getUsers().get(friendId).getFriends().add(id);
     }
 
-    public void deleteFriend(
-            Long id,
-            Long friendId
-    ) {
+    public void deleteFriend(Long id, Long friendId) {
         User user = inMemoryUserStorage.getUsers().get(id);
 
         user.getFriends().remove(friendId);
         inMemoryUserStorage.getUsers().get(friendId).getFriends().remove(id);
     }
 
-    public List<User> getFriends(
-            Long id
-    ) {
+    public List<User> getFriends(Long id) {
         Set<Long> friends = inMemoryUserStorage.getUsers().get(id).getFriends();
 
         return inMemoryUserStorage.getUsers().values().stream()
@@ -49,10 +41,7 @@ public class UserService {
                 .toList();
     }
 
-    public List<User> getMutualFriends(
-            Long id,
-            Long otherId
-    ) {
+    public List<User> getMutualFriends(Long id, Long otherId) {
         Set<Long> friends = inMemoryUserStorage.getUsers().get(id).getFriends();
         Set<Long> otherFriends = inMemoryUserStorage.getUsers().get(otherId).getFriends();
 

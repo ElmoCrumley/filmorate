@@ -20,39 +20,39 @@ public class InMemoryUserStorage  implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
 
     public Collection<User> findAll() {
-        log.info("Getting a list of users");
+        log.trace("method * findAll(), Getting a list of users");
         return users.values();
     }
 
     @Override
     public User create(@Valid @RequestBody User user) {
         user.setId(getNextId());
-        log.trace("Set an ID");
+        log.trace("method * create(), Set an ID");
         users.put(user.getId(), user);
-        log.trace("Put the user");
+        log.trace("method * create(), Put the user");
         return user;
     }
 
     @Override
     public User update(@Valid @RequestBody User user) {
         Long userId = user.getId();
-        log.trace("Field userId has been created");
+        log.trace("method * update(), Field userId has been created");
 
         if (users.containsKey(userId)) {
             User oldUser = users.get(userId);
-            log.trace("Field oldUser has been created");
-
+            log.trace("method * update(), Field oldUser has been created");
             oldUser.setBirthday(user.getBirthday());
-            log.trace("Set the birthday");
+            log.trace("method * update(), Set the birthday");
             oldUser.setLogin(user.getLogin());
-            log.trace("Set the login");
+            log.trace("method * update(), Set the login");
             oldUser.setName(user.getName());
-            log.trace("Set the name");
+            log.trace("method * update(), Set the name");
             oldUser.setEmail(user.getEmail());
-            log.trace("Set the email");
+            log.trace("method * update(), Set the email");
             return oldUser;
         }
-        log.error("User with this ID is not found");
+
+        log.error("method * update(), User with this ID is not found");
         throw new NotFoundException("Пользователь с ID = " + userId + " не найден");
     }
 
@@ -61,7 +61,7 @@ public class InMemoryUserStorage  implements UserStorage {
     }
 
     private long getNextId() {
-        log.trace("Creating an ID");
+        log.trace("method * getNextId(), Creating an ID");
         long currentMaxId = users.keySet()
                 .stream()
                 .mapToLong(id -> id)

@@ -28,7 +28,8 @@ public class FilmController {
 
     @GetMapping
     public Collection<Film> findAll() {
-        log.info("Getting a list of films");
+        // calling
+        log.info("* Calling *, class InMemoryFilmStorage, method findAll()");
         return filmService.inMemoryFilmStorage.findAll();
     }
 
@@ -36,7 +37,8 @@ public class FilmController {
     @PostMapping
     public Film include(@Valid @RequestBody Film film) {
 
-        log.debug("Validation is starting");
+        //validation
+        log.debug("* Validation * is starting, method include()");
         if (film.getDescription().length() > 200) {
             log.error("Exception, description's length is more that 200");
             throw new ValidationException("Максимальная длина описания — 200 символов");
@@ -47,25 +49,34 @@ public class FilmController {
             log.error("Exception, the date of release is before December 28, 1895.");
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
-        log.debug("Validation is passed");
+        log.debug("* Validation * is passed, method include()");
 
+        // calling
+        log.info("* Calling *, class InMemoryFilmStorage, method include()");
         return filmService.inMemoryFilmStorage.include(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
 
+        //validation
+        log.debug("* Validation * is starting, method update()");
         log.info("Updating the film");
         if (film.getId() == null) {
             log.error("Exception, ID is empty");
             throw new NullPointerException("ID должен быть указан");
         }
+        log.debug("* Validation * is passed, method update()");
 
+        // calling
+        log.info("* Calling *, class InMemoryFilmStorage, method update()");
         return filmService.inMemoryFilmStorage.update(film);
     }
 
     @DeleteMapping
     public Film delete(Film film) {
+        // calling
+        log.info("* Calling *, class InMemoryFilmStorage, method delete()");
         return filmService.inMemoryFilmStorage.delete(film);
     }
 
@@ -75,6 +86,8 @@ public class FilmController {
             @PathVariable ("userId") Long userId
     ) {
 
+        //validation
+        log.debug("* Validation * is starting, method addLike()");
         if (filmService.inMemoryFilmStorage.getFilms().get(id) == null) {
             throw new NotFoundException("Film is not found");
         }
@@ -82,7 +95,10 @@ public class FilmController {
         if (filmService.inMemoryFilmStorage.inMemoryUserStorage.getUsers().get(userId) == null) {
             throw new NotFoundException("User is not found");
         }
+        log.debug("* Validation * is passed, method addLike()");
 
+        // calling
+        log.info("* Calling *, class FilmService, method addLike()");
         filmService.addLike(id, userId);
     }
 
@@ -92,6 +108,8 @@ public class FilmController {
             @PathVariable ("userId") Long userId
     ) {
 
+        //validation
+        log.debug("* Validation * is starting, method deleteLike()");
         if (filmService.inMemoryFilmStorage.getFilms().get(id) == null) {
             throw new NotFoundException("Film is not found");
         }
@@ -99,7 +117,10 @@ public class FilmController {
         if (filmService.inMemoryFilmStorage.inMemoryUserStorage.getUsers().get(userId) == null) {
             throw new NotFoundException("User is not found");
         }
+        log.debug("* Validation * is passed, method deleteLike()");
 
+        // calling
+        log.info("* Calling *, class FilmService, method deleteLike()");
         filmService.deleteLike(id, userId);
     }
 
@@ -108,6 +129,8 @@ public class FilmController {
     public List<Film> getMostPopular(
             @RequestParam (defaultValue = "10") long count
     ) {
+        // calling
+        log.info("* Calling *, class FilmService, method getMostPopular()");
         return filmService.getMostPopular(count);
     }
 }

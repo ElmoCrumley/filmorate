@@ -14,24 +14,24 @@ public class ErrorHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationArgumentsException(Exception e) {
-        return new ErrorResponse("Method argument isn't valid");
+        return new ErrorResponse("* Exception *" + "Method argument isn't valid");
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(ValidationException e) {
-        return new ErrorResponse(e.getMessage());
+        return new ErrorResponse("* Exception *" + e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(NotFoundException e) {
-        return new ErrorResponse(e.getMessage());
+        return new ErrorResponse("* Exception *" + e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(Throwable e) {
-        return new ErrorResponse("Произошла непредвиденная ошибка.");
+        return new ErrorResponse("* Exception *" + "Произошла непредвиденная ошибка.");
     }
 }

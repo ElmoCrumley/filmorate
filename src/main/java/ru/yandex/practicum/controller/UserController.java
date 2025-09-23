@@ -28,6 +28,8 @@ public class UserController {
 
     @GetMapping
     public Collection<User> findAll() {
+        // calling
+        log.info("* Calling *, class InMemoryUserStorage, method findAll()");
         return userService.inMemoryUserStorage.findAll();
     }
 
@@ -35,40 +37,49 @@ public class UserController {
     @PostMapping
     public User create(@Valid @RequestBody User user) {
 
-        log.debug("Validation is starting");
+        // validation
+        log.debug("* Validation * is starting, method create()");
         if (user.getLogin().contains(" ")) {
-            log.error("Exception, name is contains \" \"");
+            log.error("* Exception *, name is contains \" \"");
             throw new ValidationException("Логин не может содержать пробелы");
         }
 
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
-            log.info("User changed name to login");
+            log.info("* Changing *, Users' name to login");
         }
 
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.error("Exception, birthday is in the future");
+            log.error("* Exception *, birthday is in the future");
             throw new ValidationException("Дата рождения не может быть в будущем");
         }
-        log.debug("Validation is passed");
+        log.debug("* Validation * is passed, method create()");
 
+        // calling
+        log.info("* Calling *, class InMemoryUserStorage, method create()");
         return userService.inMemoryUserStorage.create(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
 
-        log.info("Updating the user");
+        // validation
+        log.debug("* Validation * is starting, method update()");
         if (user.getId() == null) {
-            log.error("Exception, ID is empty");
+            log.error("* Exception *, ID is empty");
             throw new NullPointerException("Id должен быть указан");
         }
+        log.debug("* Validation * is passed, method update()");
 
+        // calling
+        log.info("* Calling *, class InMemoryUserStorage, method update()");
         return userService.inMemoryUserStorage.update(user);
     }
 
     @DeleteMapping
     public void delete(@Valid @RequestBody User user) {
+        // calling
+        log.info("* Calling *, class InMemoryUserStorage, method delete()");
         userService.inMemoryUserStorage.delete(user);
     }
 
@@ -78,15 +89,22 @@ public class UserController {
             @PathVariable Long friendId
     ) {
 
+        // validation
+        log.debug("* Validation * is starting, method addFriend()");
         if (userService.inMemoryUserStorage.getUsers().get(id) == null) {
+            log.error("* Exception *, User is not found");
             throw new NotFoundException("User is not found");
         }
 
         if (userService.inMemoryUserStorage.getUsers().get(friendId) == null) {
+            log.error("* Exception *, Friend is not found");
             throw new NotFoundException("Friend is not found");
         }
+        log.debug("* Validation * is passed, method addFriend()");
 
         log.info("Adding the friend {} for user {}", friendId, id);
+        //calling
+        log.info("* Calling *, class UserService, method addFriend()");
         userService.addFriend(id, friendId);
         log.info("Users' {} friends: {}", id, userService.getFriends(id));
         log.info("Users' {} friends: {}", friendId, userService.getFriends(friendId));
@@ -98,14 +116,21 @@ public class UserController {
             @PathVariable Long friendId
     ) {
 
+        // validation
+        log.debug("* Validation * is starting, method deleteFriend()");
         if (userService.inMemoryUserStorage.getUsers().get(id) == null) {
+            log.error("* Exception *, User is not found");
             throw new NotFoundException("User is not found");
         }
 
         if (userService.inMemoryUserStorage.getUsers().get(friendId) == null) {
+            log.error("* Exception *, Friend is not found");
             throw new NotFoundException("Friend is not found");
         }
+        log.debug("* Validation * is passed, method deleteFriend()");
 
+        // calling
+        log.info("* Calling *, class UserService, method deleteFriend()");
         userService.deleteFriend(id, friendId);
     }
 
@@ -113,9 +138,17 @@ public class UserController {
     public List<User> getFriends(
             @PathVariable Long id
     ) {
+
+        //validation
+        log.debug("* Validation * is starting, method getFriends()");
         if (userService.inMemoryUserStorage.getUsers().get(id) == null) {
+            log.error("* Exception *, User is not found");
             throw new NotFoundException("User is not found");
         }
+        log.debug("* Validation * is passed, method getFriends()");
+
+        // calling
+        log.info("* Calling *, class UserService, method getFriends()");
         return userService.getFriends(id);
     }
 
@@ -124,6 +157,8 @@ public class UserController {
             @PathVariable Long id,
             @PathVariable Long otherId
     ) {
+        //calling
+        log.info("* Calling *, class UserService, method getMutualFriends()");
         return userService.getMutualFriends(id, otherId);
     }
 }
