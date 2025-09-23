@@ -1,5 +1,6 @@
 package ru.yandex.practicum.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
@@ -9,38 +10,36 @@ import ru.yandex.practicum.storage.InMemoryFilmStorage;
 import java.util.Comparator;
 import java.util.List;
 
+@Slf4j
 @RestController
 @Service
 public class FilmService {
 
-    InMemoryFilmStorage filmStorage;
+    public InMemoryFilmStorage inMemoryFilmStorage;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage filmStorage) {
-        this.filmStorage = filmStorage;
+    public FilmService(InMemoryFilmStorage inMemoryFilmStorage) {
+        this.inMemoryFilmStorage = inMemoryFilmStorage;
     }
 
-    @PutMapping("/films/{id}/like/{userId}")
     public void addLike(
-            @PathVariable ("id") Long id,
-            @PathVariable ("userId") Long userId
+            Long id,
+            Long userId
     ) {
-        filmStorage.getFilms().get(id).getLikes().add(userId);
+        inMemoryFilmStorage.getFilms().get(id).getLikes().add(userId);
     }
 
-    @DeleteMapping("/films/{id}/like/{userId}")
     public void deleteLike(
-            @PathVariable ("id") Long id,
-            @PathVariable ("userId") Long userId
+            Long id,
+            Long userId
     ) {
-        filmStorage.getFilms().get(id).getLikes().remove(userId);
+        inMemoryFilmStorage.getFilms().get(id).getLikes().remove(userId);
     }
 
-    @GetMapping("/films/popular?count={count}")
     public List<Film> getMostPopular(
-        @RequestParam (defaultValue = "10") int count
+        long count
     ) {
-        return filmStorage.getFilms().values()
+        return inMemoryFilmStorage.findAll()
                 .stream()
                 .sorted(new LikesComparator())
                 .limit(count)
@@ -50,7 +49,7 @@ public class FilmService {
     public static class LikesComparator implements Comparator<Film> {
         @Override
         public int compare(Film f1, Film f2) {
-            return Integer.compare(f1.getLikes().size(), f2.getLikes().size());
+            return Integer.compare(f2.getLikes().size(), f1.getLikes().size());
         }
     }
 }

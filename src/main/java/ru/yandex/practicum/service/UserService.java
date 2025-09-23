@@ -7,55 +7,58 @@ import ru.yandex.practicum.model.User;
 import ru.yandex.practicum.storage.InMemoryUserStorage;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @Service
 public class UserService {
 
-    InMemoryUserStorage userStorage;
+        public InMemoryUserStorage inMemoryUserStorage;
 
-    @Autowired
-    public UserService(InMemoryUserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+        @Autowired
+        public UserService(InMemoryUserStorage inMemoryUserStorage) {
+            this.inMemoryUserStorage = inMemoryUserStorage;
+        }
 
-    @PutMapping("/users/{id}/friends/{friendId}")
     public void addFriend(
-            @PathVariable ("id") Long id,
-            @PathVariable ("friendId") Long friendId
+            Long id,
+            Long friendId
     ) {
-        User user = userStorage.getUsers().get(id);
 
-        user.getFriends().add(friendId);
-        userStorage.getUsers().get(friendId).getFriends().add(id);
+        inMemoryUserStorage.getUsers().get(id).getFriends().add(friendId);
+        inMemoryUserStorage.getUsers().get(friendId).getFriends().add(id);
     }
 
-    @DeleteMapping("/users/{id}/friends/{friendId}")
     public void deleteFriend(
-            @PathVariable ("id") Long id,
-            @PathVariable ("friendId") Long friendId
+            Long id,
+            Long friendId
     ) {
-        User user = userStorage.getUsers().get(id);
+        User user = inMemoryUserStorage.getUsers().get(id);
 
         user.getFriends().remove(friendId);
-        userStorage.getUsers().get(friendId).getFriends().remove(id);
+        inMemoryUserStorage.getUsers().get(friendId).getFriends().remove(id);
     }
 
-    @GetMapping("/users/{id}/friends")
-    public List<Long> getFriends(
-            @PathVariable ("id") Long id
+    public List<User> getFriends(
+            Long id
     ) {
-        return userStorage.getUsers().get(id).getFriends().stream().toList();
+        Set<Long> friends = inMemoryUserStorage.getUsers().get(id).getFriends();
+
+        return inMemoryUserStorage.getUsers().values().stream()
+                .filter(user -> friends.contains(user.getId()))
+                .toList();
     }
 
-    @GetMapping("/users/{id}/friends/common/{otherId}")
-    public List<Long> getMutualFriends(
-            @PathVariable ("id") Long id,
-            @PathVariable ("otherId") Long otherId
+    public List<User> getMutualFriends(
+            Long id,
+            Long otherId
     ) {
-        return userStorage.getUsers().get(id).getFriends()
-                .stream()
-                .filter(user -> userStorage.getUsers().get(otherId).getFriends().contains(user))
+        Set<Long> friends = inMemoryUserStorage.getUsers().get(id).getFriends();
+        Set<Long> otherFriends = inMemoryUserStorage.getUsers().get(otherId).getFriends();
+
+        return inMemoryUserStorage.getUsers().values().stream()
+                .filter(user -> friends.contains(user.getId()))
+                .filter(user -> otherFriends.contains(user.getId()))
                 .toList();
     }
 }
