@@ -3,6 +3,7 @@ package ru.yandex.practicum.storage;
 import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +23,12 @@ import java.util.Map;
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Long, Film> films = new HashMap<>();
+    public InMemoryUserStorage inMemoryUserStorage;
+
+    @Autowired
+    InMemoryFilmStorage(InMemoryUserStorage inMemoryUserStorage) {
+        this.inMemoryUserStorage = inMemoryUserStorage;
+    }
 
     public Collection<Film> findAll() {
         log.info("Getting a list of films");
@@ -54,12 +61,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film update(@Valid @RequestBody Film film) {
 
-        log.info("Updating the film");
-        if (film.getId() == null) {
-            log.error("Exception, ID is empty");
-            throw new NullPointerException("ID должен быть указан");
-        }
-
         Long filmId = film.getId();
         log.trace("Field filmId has been created");
 
@@ -83,6 +84,9 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film delete(@Valid @RequestBody Film film) {
+
+        films.remove(film.getId());
+
         return new Film();
     }
 
