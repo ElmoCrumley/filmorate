@@ -10,5 +10,5 @@ public interface UserStorage {
 
     public User update(@Valid @RequestBody User user);
 
-    public User delete(@Valid @RequestBody User user);
+    public void delete(@Valid @RequestBody User user);
 }
