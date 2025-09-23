@@ -2,29 +2,36 @@ package ru.yandex.practicum.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.exception.ValidationException;
 import ru.yandex.practicum.model.User;
+import ru.yandex.practicum.service.UserService;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
-    private final Map<Long, User> users = new HashMap<>();
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public Collection<User> findAll() {
-        log.info("Getting a list of users");
-        return users.values();
+        return userService.inMemoryUserStorage.findAll();
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public User create(@Valid @RequestBody User user) {
 
@@ -45,11 +52,7 @@ public class UserController {
         }
         log.debug("Validation is passed");
 
-        user.setId(getNextId());
-        log.trace("Set an ID");
-        users.put(user.getId(), user);
-        log.trace("Put the user");
-        return user;
+        return userService.inMemoryUserStorage.create(user);
     }
 
     @PutMapping
@@ -61,34 +64,66 @@ public class UserController {
             throw new NullPointerException("Id должен быть указан");
         }
 
-        Long userId = user.getId();
-        log.trace("Field userId has been created");
-
-        if (users.containsKey(userId)) {
-            User oldUser = users.get(userId);
-            log.trace("Field oldUser has been created");
-
-            oldUser.setBirthday(user.getBirthday());
-            log.trace("Set the birthday");
-            oldUser.setLogin(user.getLogin());
-            log.trace("Set the login");
-            oldUser.setName(user.getName());
-            log.trace("Set the name");
-            oldUser.setEmail(user.getEmail());
-            log.trace("Set the email");
-            return oldUser;
-        }
-        log.error("User with this ID is not found");
-        throw new NotFoundException("Пользователь с ID = " + userId + " не найден");
+        return userService.inMemoryUserStorage.update(user);
     }
 
-    private long getNextId() {
-        log.trace("Creating an ID");
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @DeleteMapping
+    public void delete(@Valid @RequestBody User user) {
+        userService.inMemoryUserStorage.delete(user);
+    }
+
+    @PutMapping(value = "/{id}/friends/{friendId}")
+    public void addFriend(
+            @PathVariable Long id,
+            @PathVariable Long friendId
+    ) {
+
+        if (userService.inMemoryUserStorage.getUsers().get(id) == null) {
+            throw new NotFoundException("User is not found");
+        }
+
+        if (userService.inMemoryUserStorage.getUsers().get(friendId) == null) {
+            throw new NotFoundException("Friend is not found");
+        }
+
+        log.info("Adding the friend {} for user {}", friendId, id);
+        userService.addFriend(id, friendId);
+        log.info("Users' {} friends: {}", id, userService.getFriends(id));
+        log.info("Users' {} friends: {}", friendId, userService.getFriends(friendId));
+    }
+
+    @DeleteMapping(value = "/{id}/friends/{friendId}")
+    public void deleteFriend(
+            @PathVariable Long id,
+            @PathVariable Long friendId
+    ) {
+
+        if (userService.inMemoryUserStorage.getUsers().get(id) == null) {
+            throw new NotFoundException("User is not found");
+        }
+
+        if (userService.inMemoryUserStorage.getUsers().get(friendId) == null) {
+            throw new NotFoundException("Friend is not found");
+        }
+
+        userService.deleteFriend(id, friendId);
+    }
+
+    @GetMapping(value = "/{id}/friends")
+    public List<User> getFriends(
+            @PathVariable Long id
+    ) {
+        if (userService.inMemoryUserStorage.getUsers().get(id) == null) {
+            throw new NotFoundException("User is not found");
+        }
+        return userService.getFriends(id);
+    }
+
+    @GetMapping(value = "/{id}/friends/common/{otherId}")
+    public List<User> getMutualFriends(
+            @PathVariable Long id,
+            @PathVariable Long otherId
+    ) {
+        return userService.getMutualFriends(id, otherId);
     }
 }

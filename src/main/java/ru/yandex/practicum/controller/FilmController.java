@@ -2,29 +2,37 @@ package ru.yandex.practicum.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.exception.ValidationException;
 import ru.yandex.practicum.model.Film;
+import ru.yandex.practicum.service.FilmService;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
 
-    private final Map<Long, Film> films = new HashMap<>();
+    FilmService filmService;
+
+    @Autowired
+    FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @GetMapping
     public Collection<Film> findAll() {
         log.info("Getting a list of films");
-        return films.values();
+        return filmService.inMemoryFilmStorage.findAll();
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public Film include(@Valid @RequestBody Film film) {
 
@@ -41,11 +49,7 @@ public class FilmController {
         }
         log.debug("Validation is passed");
 
-        film.setId(getNextId());
-        log.trace("Set an ID");
-        films.put(film.getId(), film);
-        log.trace("Put the film");
-        return film;
+        return filmService.inMemoryFilmStorage.include(film);
     }
 
     @PutMapping
@@ -57,34 +61,53 @@ public class FilmController {
             throw new NullPointerException("ID должен быть указан");
         }
 
-        Long filmId = film.getId();
-        log.trace("Field filmId has been created");
-
-        if (films.containsKey(filmId)) {
-            Film oldFilm = films.get(filmId);
-            log.trace("Field oldFilm has been created");
-
-            oldFilm.setReleaseDate(film.getReleaseDate());
-            log.trace("Set the release date");
-            oldFilm.setName(film.getName());
-            log.trace("Set the name");
-            oldFilm.setDuration(film.getDuration());
-            log.trace("Set the duration");
-            oldFilm.setDescription(film.getDescription());
-            log.trace("Set the description");
-            return oldFilm;
-        }
-        log.error("Film with this ID is not found");
-        throw new NotFoundException("Фильм с ID = " + filmId + " не найден");
+        return filmService.inMemoryFilmStorage.update(film);
     }
 
-    private long getNextId() {
-        log.trace("Creating an ID");
-        long currentMaxId = films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @DeleteMapping
+    public Film delete(Film film) {
+        return filmService.inMemoryFilmStorage.delete(film);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(
+            @PathVariable ("id") Long id,
+            @PathVariable ("userId") Long userId
+    ) {
+
+        if (filmService.inMemoryFilmStorage.getFilms().get(id) == null) {
+            throw new NotFoundException("Film is not found");
+        }
+
+        if (filmService.inMemoryFilmStorage.inMemoryUserStorage.getUsers().get(userId) == null) {
+            throw new NotFoundException("User is not found");
+        }
+
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteLike(
+            @PathVariable ("id") Long id,
+            @PathVariable ("userId") Long userId
+    ) {
+
+        if (filmService.inMemoryFilmStorage.getFilms().get(id) == null) {
+            throw new NotFoundException("Film is not found");
+        }
+
+        if (filmService.inMemoryFilmStorage.inMemoryUserStorage.getUsers().get(userId) == null) {
+            throw new NotFoundException("User is not found");
+        }
+
+        filmService.deleteLike(id, userId);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/popular")
+    public List<Film> getMostPopular(
+            @RequestParam (defaultValue = "10") long count
+    ) {
+        return filmService.getMostPopular(count);
     }
 }
