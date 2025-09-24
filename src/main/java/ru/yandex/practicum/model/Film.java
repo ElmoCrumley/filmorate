@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
@@ -12,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@FieldDefaults
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Film {
     Long id;
     @NotNull
