@@ -13,12 +13,12 @@ import java.util.Set;
 @Service
 public class UserService {
 
-        public InMemoryUserStorage inMemoryUserStorage;
+    public InMemoryUserStorage inMemoryUserStorage;
 
-        @Autowired
-        public UserService(InMemoryUserStorage inMemoryUserStorage) {
-            this.inMemoryUserStorage = inMemoryUserStorage;
-        }
+    @Autowired
+    public UserService(InMemoryUserStorage inMemoryUserStorage) {
+        this.inMemoryUserStorage = inMemoryUserStorage;
+    }
 
     public void addFriend(Long id, Long friendId) {
         inMemoryUserStorage.getUsers().get(id).getFriends().add(friendId);

@@ -82,8 +82,8 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(
-            @PathVariable ("id") Long id,
-            @PathVariable ("userId") Long userId
+            @PathVariable("id") Long id,
+            @PathVariable("userId") Long userId
     ) {
 
         //validation
@@ -104,8 +104,8 @@ public class FilmController {
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(
-            @PathVariable ("id") Long id,
-            @PathVariable ("userId") Long userId
+            @PathVariable("id") Long id,
+            @PathVariable("userId") Long userId
     ) {
 
         //validation
@@ -127,7 +127,7 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/popular")
     public List<Film> getMostPopular(
-            @RequestParam (defaultValue = "10") long count
+            @RequestParam(defaultValue = "10") long count
     ) {
         // calling
         log.info("* Calling *, class FilmService, method getMostPopular()");
