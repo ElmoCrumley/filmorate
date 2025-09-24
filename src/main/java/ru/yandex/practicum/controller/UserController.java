@@ -40,7 +40,6 @@ public class UserController {
         // validation
         log.debug("* Validation * is starting, method create()");
         if (user.getLogin().contains(" ")) {
-            log.error("* Exception *, name is contains \" \"");
             throw new ValidationException("Логин не может содержать пробелы");
         }
 
@@ -50,7 +49,6 @@ public class UserController {
         }
 
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.error("* Exception *, birthday is in the future");
             throw new ValidationException("Дата рождения не может быть в будущем");
         }
         log.debug("* Validation * is passed, method create()");
@@ -66,7 +64,6 @@ public class UserController {
         // validation
         log.debug("* Validation * is starting, method update()");
         if (user.getId() == null) {
-            log.error("* Exception *, ID is empty");
             throw new NullPointerException("Id должен быть указан");
         }
         log.debug("* Validation * is passed, method update()");
@@ -92,12 +89,10 @@ public class UserController {
         // validation
         log.debug("* Validation * is starting, method addFriend()");
         if (userService.inMemoryUserStorage.getUsers().get(id) == null) {
-            log.error("* Exception *, User is not found");
             throw new NotFoundException("User is not found");
         }
 
         if (userService.inMemoryUserStorage.getUsers().get(friendId) == null) {
-            log.error("* Exception *, Friend is not found");
             throw new NotFoundException("Friend is not found");
         }
         log.debug("* Validation * is passed, method addFriend()");
@@ -119,12 +114,10 @@ public class UserController {
         // validation
         log.debug("* Validation * is starting, method deleteFriend()");
         if (userService.inMemoryUserStorage.getUsers().get(id) == null) {
-            log.error("* Exception *, User is not found");
             throw new NotFoundException("User is not found");
         }
 
         if (userService.inMemoryUserStorage.getUsers().get(friendId) == null) {
-            log.error("* Exception *, Friend is not found");
             throw new NotFoundException("Friend is not found");
         }
         log.debug("* Validation * is passed, method deleteFriend()");
@@ -142,7 +135,6 @@ public class UserController {
         //validation
         log.debug("* Validation * is starting, method getFriends()");
         if (userService.inMemoryUserStorage.getUsers().get(id) == null) {
-            log.error("* Exception *, User is not found");
             throw new NotFoundException("User is not found");
         }
         log.debug("* Validation * is passed, method getFriends()");

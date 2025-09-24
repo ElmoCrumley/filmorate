@@ -1,9 +1,11 @@
 package ru.yandex.practicum.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.exception.ValidationException;
@@ -14,6 +16,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
+@Validated
 @Slf4j
 @RestController
 @RequestMapping("/films")
@@ -40,13 +43,11 @@ public class FilmController {
         //validation
         log.debug("* Validation * is starting, method include()");
         if (film.getDescription().length() > 200) {
-            log.error("Exception, description's length is more that 200");
             throw new ValidationException("Максимальная длина описания — 200 символов");
         }
 
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))
                 || film.getReleaseDate().isAfter(LocalDate.now())) {
-            log.error("Exception, the date of release is before December 28, 1895.");
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
         log.debug("* Validation * is passed, method include()");
@@ -63,7 +64,6 @@ public class FilmController {
         log.debug("* Validation * is starting, method update()");
         log.info("Updating the film");
         if (film.getId() == null) {
-            log.error("Exception, ID is empty");
             throw new NullPointerException("ID должен быть указан");
         }
         log.debug("* Validation * is passed, method update()");
@@ -127,7 +127,7 @@ public class FilmController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/popular")
     public List<Film> getMostPopular(
-            @RequestParam(defaultValue = "10") long count
+            @Positive @RequestParam(defaultValue = "10") long count
     ) {
         // calling
         log.info("* Calling *, class FilmService, method getMostPopular()");
