@@ -5,24 +5,26 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@FieldDefaults
 public class User {
-    private Long id;
+    Long id;
     @Email
     @NotNull
     @NotBlank
-    private String email;
+    String email;
     @NotNull
     @NotBlank
-    private String login;
-    private String name;
+    String login;
+    String name;
     @NotNull
-    private LocalDate birthday;
+    LocalDate birthday;
     @JsonIgnore
-    private Set<Long> friends = new HashSet<>();
+    Set<Long> friends = new HashSet<>();
 }
