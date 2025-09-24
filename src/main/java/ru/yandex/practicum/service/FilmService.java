@@ -2,14 +2,12 @@ package ru.yandex.practicum.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.model.Film;
 import ru.yandex.practicum.storage.InMemoryFilmStorage;
 
 import java.util.Comparator;
 import java.util.List;
 
-@RestController
 @Service
 public class FilmService {
 

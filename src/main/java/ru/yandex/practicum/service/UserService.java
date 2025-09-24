@@ -2,14 +2,12 @@ package ru.yandex.practicum.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.model.User;
 import ru.yandex.practicum.storage.InMemoryUserStorage;
 
 import java.util.List;
 import java.util.Set;
 
-@RestController
 @Service
 public class UserService {
 
