@@ -1,90 +1,136 @@
 package ru.yandex.practicum.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.exception.ValidationException;
 import ru.yandex.practicum.model.Film;
+import ru.yandex.practicum.service.FilmService;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
+@Validated
 @Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
 
-    private final Map<Long, Film> films = new HashMap<>();
+    FilmService filmService;
+
+    @Autowired
+    FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @GetMapping
     public Collection<Film> findAll() {
-        log.info("Getting a list of films");
-        return films.values();
+        // calling
+        log.info("* Calling *, class InMemoryFilmStorage, method findAll()");
+        return filmService.inMemoryFilmStorage.findAll();
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public Film include(@Valid @RequestBody Film film) {
 
-        log.debug("Validation is starting");
+        //validation
+        log.debug("* Validation * is starting, method include()");
         if (film.getDescription().length() > 200) {
-            log.error("Exception, description's length is more that 200");
             throw new ValidationException("Максимальная длина описания — 200 символов");
         }
 
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))
                 || film.getReleaseDate().isAfter(LocalDate.now())) {
-            log.error("Exception, the date of release is before December 28, 1895.");
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
-        log.debug("Validation is passed");
+        log.debug("* Validation * is passed, method include()");
 
-        film.setId(getNextId());
-        log.trace("Set an ID");
-        films.put(film.getId(), film);
-        log.trace("Put the film");
-        return film;
+        // calling
+        log.info("* Calling *, class InMemoryFilmStorage, method include()");
+        return filmService.inMemoryFilmStorage.include(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
 
+        //validation
+        log.debug("* Validation * is starting, method update()");
         log.info("Updating the film");
         if (film.getId() == null) {
-            log.error("Exception, ID is empty");
             throw new NullPointerException("ID должен быть указан");
         }
+        log.debug("* Validation * is passed, method update()");
 
-        Long filmId = film.getId();
-        log.trace("Field filmId has been created");
-
-        if (films.containsKey(filmId)) {
-            Film oldFilm = films.get(filmId);
-            log.trace("Field oldFilm has been created");
-
-            oldFilm.setReleaseDate(film.getReleaseDate());
-            log.trace("Set the release date");
-            oldFilm.setName(film.getName());
-            log.trace("Set the name");
-            oldFilm.setDuration(film.getDuration());
-            log.trace("Set the duration");
-            oldFilm.setDescription(film.getDescription());
-            log.trace("Set the description");
-            return oldFilm;
-        }
-        log.error("Film with this ID is not found");
-        throw new NotFoundException("Фильм с ID = " + filmId + " не найден");
+        // calling
+        log.info("* Calling *, class InMemoryFilmStorage, method update()");
+        return filmService.inMemoryFilmStorage.update(film);
     }
 
-    private long getNextId() {
-        log.trace("Creating an ID");
-        long currentMaxId = films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @DeleteMapping
+    public Film delete(Film film) {
+        // calling
+        log.info("* Calling *, class InMemoryFilmStorage, method delete()");
+        return filmService.inMemoryFilmStorage.delete(film);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(
+            @PathVariable("id") Long id,
+            @PathVariable("userId") Long userId
+    ) {
+
+        //validation
+        log.debug("* Validation * is starting, method addLike()");
+        if (filmService.inMemoryFilmStorage.getFilms().get(id) == null) {
+            throw new NotFoundException("Film is not found");
+        }
+
+        if (filmService.inMemoryFilmStorage.inMemoryUserStorage.getUsers().get(userId) == null) {
+            throw new NotFoundException("User is not found");
+        }
+        log.debug("* Validation * is passed, method addLike()");
+
+        // calling
+        log.info("* Calling *, class FilmService, method addLike()");
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteLike(
+            @PathVariable("id") Long id,
+            @PathVariable("userId") Long userId
+    ) {
+
+        //validation
+        log.debug("* Validation * is starting, method deleteLike()");
+        if (filmService.inMemoryFilmStorage.getFilms().get(id) == null) {
+            throw new NotFoundException("Film is not found");
+        }
+
+        if (filmService.inMemoryFilmStorage.inMemoryUserStorage.getUsers().get(userId) == null) {
+            throw new NotFoundException("User is not found");
+        }
+        log.debug("* Validation * is passed, method deleteLike()");
+
+        // calling
+        log.info("* Calling *, class FilmService, method deleteLike()");
+        filmService.deleteLike(id, userId);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/popular")
+    public List<Film> getMostPopular(
+            @Positive @RequestParam(defaultValue = "10") long count
+    ) {
+        // calling
+        log.info("* Calling *, class FilmService, method getMostPopular()");
+        return filmService.getMostPopular(count);
     }
 }
