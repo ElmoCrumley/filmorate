@@ -51,7 +51,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
             oldFilm.setReleaseDate(film.getReleaseDate());
             log.trace("method * update(), Set the release date");
-            oldFilm.setName(film.getName());
+            oldFilm.setTitle(film.getTitle());
             log.trace("method * update(), Set the name");
             oldFilm.setDuration(film.getDuration());
             log.trace("method * update(), Set the duration");
