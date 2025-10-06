@@ -1,1 +1,1 @@
-![](resources/filmorate_diagram.png)
+![](src/main/resources/diagram.png)
