@@ -27,5 +27,7 @@ public class User {
     @NotNull
     LocalDate birthday;
     @JsonIgnore
-    Set<Long> friends = new HashSet<>();
+    Set<Long> friendshipRequests = new HashSet<>();
+    @JsonIgnore
+    Set<Long> friendshipConfirmed = new HashSet<>();
 }
