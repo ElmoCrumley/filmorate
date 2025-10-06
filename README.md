@@ -1,1 +1,1 @@
-![](src/main/resources/diagram.png)
+![alt text](src/main/resources/diagram.png)
