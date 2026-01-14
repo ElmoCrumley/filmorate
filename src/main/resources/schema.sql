@@ -1,0 +1,41 @@
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    login VARCHAR(40) NOT NULL,
+    name VARCHAR(40) NOT NULL,
+    birthday TIMESTAMP NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS friendshipRequests (
+    user_id BIGINT UNIQUE NOT NULL REFERENCES users(id),
+    requested_id BIGINT NOT NULL REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS friendshipConfirmed (
+    user_id BIGINT UNIQUE NOT NULL REFERENCES users(id),
+    confirmed_friend_id BIGINT NOT NULL REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS films (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    title VARCHAR(1024) NOT NULL,
+    description VARCHAR(1024),
+    releaseDate TIMESTAMP NOT NULL,
+    duration INT NOT NULL,
+    motionPictureAssociation VARCHAR(40) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS genre (
+    film_id BIGINT UNIQUE NOT NULL REFERENCES films(id),
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS motionPictureAssociation (
+    film_id BIGINT UNIQUE NOT NULL REFERENCES films(id),
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS likes (
+    user_id BIGINT UNIQUE NOT NULL REFERENCES users(id),
+    film_id BIGINT NOT NULL REFERENCES films(id)
+);
