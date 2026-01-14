@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.exception.ValidationException;
@@ -14,11 +15,11 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/users")
+@Validated
+@Slf4j
 public class UserController {
-
     private final UserService userService;
 
     @Autowired
@@ -30,13 +31,12 @@ public class UserController {
     public Collection<User> findAll() {
         // calling
         log.info("* Calling *, class InMemoryUserStorage, method findAll()");
-        return userService.inMemoryUserStorage.findAll();
+        return userService.findAll();
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public User create(@Valid @RequestBody User user) {
-
         // validation
         log.debug("* Validation * is starting, method create()");
         if (user.getLogin().contains(" ")) {
@@ -55,12 +55,11 @@ public class UserController {
 
         // calling
         log.info("* Calling *, class InMemoryUserStorage, method create()");
-        return userService.inMemoryUserStorage.create(user);
+        return userService.create(user);
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-
         // validation
         log.debug("* Validation * is starting, method update()");
         if (user.getId() == null) {
@@ -70,14 +69,14 @@ public class UserController {
 
         // calling
         log.info("* Calling *, class InMemoryUserStorage, method update()");
-        return userService.inMemoryUserStorage.update(user);
+        return userService.update(user);
     }
 
     @DeleteMapping
     public void delete(@Valid @RequestBody User user) {
         // calling
         log.info("* Calling *, class InMemoryUserStorage, method delete()");
-        userService.inMemoryUserStorage.delete(user);
+        userService.delete(user);
     }
 
     @PutMapping(value = "/{id}/friends/{friendId}")
@@ -85,14 +84,13 @@ public class UserController {
             @PathVariable Long id,
             @PathVariable Long friendId
     ) {
-
         // validation
         log.debug("* Validation * is starting, method addFriend()");
-        if (userService.inMemoryUserStorage.getUsers().get(id) == null) {
+        if (userService.findById(id) == null) {
             throw new NotFoundException("User is not found");
         }
 
-        if (userService.inMemoryUserStorage.getUsers().get(friendId) == null) {
+        if (userService.findById(friendId) == null) {
             throw new NotFoundException("Friend is not found");
         }
         log.debug("* Validation * is passed, method addFriend()");
@@ -110,14 +108,13 @@ public class UserController {
             @PathVariable Long id,
             @PathVariable Long friendId
     ) {
-
         // validation
         log.debug("* Validation * is starting, method deleteFriend()");
-        if (userService.inMemoryUserStorage.getUsers().get(id) == null) {
+        if (userService.findById(id) == null) {
             throw new NotFoundException("User is not found");
         }
 
-        if (userService.inMemoryUserStorage.getUsers().get(friendId) == null) {
+        if (userService.getFriendsIdes(id).contains(friendId)) {
             throw new NotFoundException("Friend is not found");
         }
         log.debug("* Validation * is passed, method deleteFriend()");
@@ -131,10 +128,9 @@ public class UserController {
     public List<User> getFriends(
             @PathVariable Long id
     ) {
-
         //validation
         log.debug("* Validation * is starting, method getFriends()");
-        if (userService.inMemoryUserStorage.getUsers().get(id) == null) {
+        if (userService.findById(id) == null) {
             throw new NotFoundException("User is not found");
         }
         log.debug("* Validation * is passed, method getFriends()");

@@ -1,31 +1,34 @@
 package ru.yandex.practicum.storage;
 
-import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.model.User;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-@Slf4j
-@Getter
 @Component
+@Getter
+@Slf4j
 public class InMemoryUserStorage implements UserStorage {
-
     private final Map<Long, User> users = new HashMap<>();
 
+    // reads
+    @Override
     public Collection<User> findAll() {
         log.trace("method * findAll(), Getting a list of users");
-        return users.values();
+        return List.copyOf(users.values());
     }
 
     @Override
-    public User create(@Valid @RequestBody User user) {
+    public User findById(Long userId) {
+        return users.get(userId);
+    }
+
+    // other CRUDs
+    @Override
+    public User create(User user) {
         user.setId(getNextId());
         log.trace("method * create(), Set an ID");
         users.put(user.getId(), user);
@@ -34,7 +37,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User update(@Valid @RequestBody User user) {
+    public User update(User user) {
         Long userId = user.getId();
         log.trace("method * update(), Field userId has been created");
 
@@ -56,8 +59,37 @@ public class InMemoryUserStorage implements UserStorage {
         throw new NotFoundException("Пользователь с ID = " + userId + " не найден");
     }
 
-    public void delete(@Valid @RequestBody User user) {
+    public void delete(User user) {
         users.remove(user.getId());
+    }
+
+    // CRUDs of friendship
+    @Override
+    public List<User> getFriends(Long id) {
+        return  findAll().stream()
+                .filter(user -> getFriendsConfirmations(id).contains(user.getId()))
+                .toList();
+    }
+
+    @Override
+    public Set<Long> getFriendsRequests(Long id) {
+        return users.get(id).getFriendshipRequests();
+    }
+
+    @Override
+    public Set<Long> getFriendsConfirmations(Long id) {
+        return users.get(id).getFriendshipConfirmed();
+    }
+
+    @Override
+    public List<User> getMutualFriends(Long id, Long otherId) {
+        Set<Long> friends = getFriendsConfirmations(id);
+        Set<Long> otherFriends = getFriendsConfirmations(otherId);
+
+        return findAll().stream()
+                .filter(user -> friends.contains(user.getId()))
+                .filter(user -> otherFriends.contains(user.getId()))
+                .toList();
     }
 
     private long getNextId() {
