@@ -3,34 +3,37 @@ package ru.yandex.practicum.storage;
 import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.model.Film;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-@Slf4j
 @Component
 @Getter
+@Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
-
     private final Map<Long, Film> films = new HashMap<>();
-    public InMemoryUserStorage inMemoryUserStorage;
 
-    @Autowired
-    InMemoryFilmStorage(InMemoryUserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
-    }
-
+    // reads
+    @Override
     public Collection<Film> findAll() {
         log.trace("method * findAll(), Getting a list of films");
-        return films.values();
+        return List.copyOf(films.values());
     }
 
+    @Override
+    public Film findById(Long filmId) {
+        return films.get(filmId);
+    }
+
+    @Override
+    public Set<Long> findLikesByFilmId(Long filmId) {
+        return films.get(filmId).getLikes();
+    }
+
+    // other CRUDs
     @Override
     public Film include(@Valid @RequestBody Film film) {
         film.setId(getNextId());
@@ -70,6 +73,23 @@ public class InMemoryFilmStorage implements FilmStorage {
         return new Film();
     }
 
+    @Override
+    public List<Film> getMostPopular(long count) {
+        return  findAll()
+                .stream()
+                .sorted(new LikesComparator())
+                .limit(count)
+                .toList();
+    }
+
+    public static class LikesComparator implements Comparator<Film> {
+        @Override
+        public int compare(Film f1, Film f2) {
+            return Integer.compare(f2.getLikes().size(), f1.getLikes().size());
+        }
+    }
+
+    // Create next ID
     private long getNextId() {
         log.trace("method * getNextId(), Creating an ID");
         long currentMaxId = films.keySet()

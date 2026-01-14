@@ -11,33 +11,36 @@ import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.exception.ValidationException;
 import ru.yandex.practicum.model.Film;
 import ru.yandex.practicum.service.FilmService;
+import ru.yandex.practicum.service.UserService;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
-@Validated
-@Slf4j
 @RestController
 @RequestMapping("/films")
+@Validated
+@Slf4j
 public class FilmController {
-
-    FilmService filmService;
+    private final FilmService filmService;
+    private final UserService userService;
 
     @Autowired
-    FilmController(FilmService filmService) {
+    public FilmController(FilmService filmService, UserService userService) {
         this.filmService = filmService;
+        this.userService = userService;
     }
 
+    // CRUDs of films
     @GetMapping
     public Collection<Film> findAll() {
         // calling
         log.info("* Calling *, class InMemoryFilmStorage, method findAll()");
-        return filmService.inMemoryFilmStorage.findAll();
+        return filmService.findAll();
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Film include(@Valid @RequestBody Film film) {
 
         //validation
@@ -54,7 +57,7 @@ public class FilmController {
 
         // calling
         log.info("* Calling *, class InMemoryFilmStorage, method include()");
-        return filmService.inMemoryFilmStorage.include(film);
+        return filmService.include(film);
     }
 
     @PutMapping
@@ -70,62 +73,63 @@ public class FilmController {
 
         // calling
         log.info("* Calling *, class InMemoryFilmStorage, method update()");
-        return filmService.inMemoryFilmStorage.update(film);
+        return filmService.update(film);
     }
 
     @DeleteMapping
     public Film delete(Film film) {
         // calling
         log.info("* Calling *, class InMemoryFilmStorage, method delete()");
-        return filmService.inMemoryFilmStorage.delete(film);
+        return filmService.delete(film);
     }
 
+    // CRUDs of likes
     @PutMapping("/{id}/like/{userId}")
     public void addLike(
-            @PathVariable("id") Long id,
+            @PathVariable("id") Long filmId,
             @PathVariable("userId") Long userId
     ) {
 
         //validation
         log.debug("* Validation * is starting, method addLike()");
-        if (filmService.inMemoryFilmStorage.getFilms().get(id) == null) {
+        if (filmService.findById(filmId) == null) {
             throw new NotFoundException("Film is not found");
         }
 
-        if (filmService.inMemoryFilmStorage.inMemoryUserStorage.getUsers().get(userId) == null) {
+        if (userService.findById(userId) == null) {
             throw new NotFoundException("User is not found");
         }
         log.debug("* Validation * is passed, method addLike()");
 
         // calling
         log.info("* Calling *, class FilmService, method addLike()");
-        filmService.addLike(id, userId);
+        filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(
-            @PathVariable("id") Long id,
+            @PathVariable("id") Long filmId,
             @PathVariable("userId") Long userId
     ) {
 
         //validation
         log.debug("* Validation * is starting, method deleteLike()");
-        if (filmService.inMemoryFilmStorage.getFilms().get(id) == null) {
+        if (filmService.findById(filmId) == null) {
             throw new NotFoundException("Film is not found");
         }
 
-        if (filmService.inMemoryFilmStorage.inMemoryUserStorage.getUsers().get(userId) == null) {
+        if (userService.findById(userId) == null) {
             throw new NotFoundException("User is not found");
         }
         log.debug("* Validation * is passed, method deleteLike()");
 
         // calling
         log.info("* Calling *, class FilmService, method deleteLike()");
-        filmService.deleteLike(id, userId);
+        filmService.deleteLike(filmId, userId);
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/popular")
+    @ResponseStatus(HttpStatus.OK)
     public List<Film> getMostPopular(
             @Positive @RequestParam(defaultValue = "10") long count
     ) {

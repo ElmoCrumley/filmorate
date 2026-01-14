@@ -3,41 +3,54 @@ package ru.yandex.practicum.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.model.Film;
-import ru.yandex.practicum.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.storage.FilmStorage;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
 @Service
 public class FilmService {
-
-    public InMemoryFilmStorage inMemoryFilmStorage;
+    final private FilmStorage filmStorage;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage inMemoryFilmStorage) {
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
+    public FilmService(FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
     }
 
-    public void addLike(Long id, Long userId) {
-        inMemoryFilmStorage.getFilms().get(id).getLikes().add(userId);
+    // reads
+    public Collection<Film> findAll() {
+        return filmStorage.findAll();
     }
 
-    public void deleteLike(Long id, Long userId) {
-        inMemoryFilmStorage.getFilms().get(id).getLikes().remove(userId);
+    public Film findById(Long filmId) {
+        return filmStorage.findById(filmId);
     }
 
+    // other CRUDs
+    public Film include(Film film) {
+        return filmStorage.include(film);
+    }
+
+    public Film update(Film film) {
+        return filmStorage.update(film);
+    }
+
+    public Film delete(Film film) {
+        return filmStorage.delete(film);
+    }
+
+    // CRUDs of likes
+    public void addLike(Long filmId, Long userId) {
+        filmStorage.findLikesByFilmId(filmId).add(userId);
+    }
+
+    public void deleteLike(Long filmId, Long userId) {
+        filmStorage.findLikesByFilmId(filmId).remove(userId);
+    }
+
+    // Read populars
     public List<Film> getMostPopular(long count) {
-        return inMemoryFilmStorage.findAll()
-                .stream()
-                .sorted(new LikesComparator())
-                .limit(count)
-                .toList();
-    }
-
-    public static class LikesComparator implements Comparator<Film> {
-        @Override
-        public int compare(Film f1, Film f2) {
-            return Integer.compare(f2.getLikes().size(), f1.getLikes().size());
-        }
+        return filmStorage.getMostPopular(count);
     }
 }
