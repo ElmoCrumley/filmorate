@@ -1,29 +1,28 @@
 package ru.yandex.practicum.storage;
 
-import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.model.Film;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 public interface FilmStorage {
-
-    // finds
+    // films CRUDs
     public Collection<Film> findAll();
 
     public Film findById(Long id);
 
-    public Set<Long> findLikesByFilmId(Long userId);
+    public Film include(Film film);
 
-    // other calls
-    public Film include(@Valid @RequestBody Film film);
+    public Film update(Film film);
 
-    public Film update(@Valid @RequestBody Film film);
+    public Film delete(Film film);
 
-    public Film delete(@Valid @RequestBody Film film);
+    // CRUDs of likes
+    public void addLike(Long filmId, Long userId);
 
+    public void deleteLike(Long filmId, Long userId);
+
+    // read populars
     public List<Film> getMostPopular(long count);
 
 }
