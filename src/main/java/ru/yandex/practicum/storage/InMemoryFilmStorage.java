@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.model.Film;
-
 import java.util.*;
 
 @Component
@@ -16,7 +15,7 @@ import java.util.*;
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
 
-    // reads
+    // films CRUDs
     @Override
     public Collection<Film> findAll() {
         log.trace("method * findAll(), Getting a list of films");
@@ -73,6 +72,22 @@ public class InMemoryFilmStorage implements FilmStorage {
         return new Film();
     }
 
+    // CRUDs of likes
+    public Set<Long> findLikesByFilmId(Long filmId) {
+        return films.get(filmId).getLikes();
+    }
+
+    @Override
+    public void addLike(Long filmId, Long userId) {
+        findLikesByFilmId(filmId).add(userId);
+    }
+
+    @Override
+    public void deleteLike(Long filmId, Long userId) {
+        findLikesByFilmId(filmId).remove(userId);
+    }
+
+    // read populars
     @Override
     public List<Film> getMostPopular(long count) {
         return  findAll()
@@ -89,7 +104,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
     }
 
-    // Create next ID
+    // create next ID
     private long getNextId() {
         log.trace("method * getNextId(), Creating an ID");
         long currentMaxId = films.keySet()

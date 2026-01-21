@@ -14,7 +14,7 @@ import java.util.*;
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
 
-    // reads
+    // users CRUDs
     @Override
     public Collection<User> findAll() {
         log.trace("method * findAll(), Getting a list of users");
@@ -26,7 +26,6 @@ public class InMemoryUserStorage implements UserStorage {
         return users.get(userId);
     }
 
-    // other CRUDs
     @Override
     public User create(User user) {
         user.setId(getNextId());
@@ -67,24 +66,23 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public List<User> getFriends(Long id) {
         return  findAll().stream()
-                .filter(user -> getFriendsConfirmations(id).contains(user.getId()))
+                .filter(user -> getFriendsIdes(id).contains(user.getId()))
                 .toList();
     }
 
-    @Override
     public Set<Long> getFriendsRequests(Long id) {
         return users.get(id).getFriendshipRequests();
     }
 
     @Override
-    public Set<Long> getFriendsConfirmations(Long id) {
+    public Set<Long> getFriendsIdes(Long id) {
         return users.get(id).getFriendshipConfirmed();
     }
 
     @Override
     public List<User> getMutualFriends(Long id, Long otherId) {
-        Set<Long> friends = getFriendsConfirmations(id);
-        Set<Long> otherFriends = getFriendsConfirmations(otherId);
+        Set<Long> friends = getFriendsIdes(id);
+        Set<Long> otherFriends = getFriendsIdes(otherId);
 
         return findAll().stream()
                 .filter(user -> friends.contains(user.getId()))
@@ -92,6 +90,19 @@ public class InMemoryUserStorage implements UserStorage {
                 .toList();
     }
 
+    @Override
+    public void addFriend(Long id, Long friendId) {
+        getFriendsRequests(id).add(friendId);
+        getFriendsRequests(friendId).add(id);
+    }
+
+    @Override
+    public void deleteFriend(Long id, Long friendId) {
+        getFriendsIdes(id).remove(friendId);
+        getFriendsIdes(friendId).remove(id);
+    }
+
+    // create next ID
     private long getNextId() {
         log.trace("method * getNextId(), Creating an ID");
         long currentMaxId = users.keySet()
