@@ -6,19 +6,18 @@ import ru.yandex.practicum.model.Film;
 import ru.yandex.practicum.storage.FilmStorage;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
 public class FilmService {
-    final private FilmStorage filmStorage;
+    private final FilmStorage filmStorage;
 
     @Autowired
     public FilmService(FilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
 
-    // reads
+    // films CRUDs
     public Collection<Film> findAll() {
         return filmStorage.findAll();
     }
@@ -27,7 +26,6 @@ public class FilmService {
         return filmStorage.findById(filmId);
     }
 
-    // other CRUDs
     public Film include(Film film) {
         return filmStorage.include(film);
     }
@@ -42,14 +40,14 @@ public class FilmService {
 
     // CRUDs of likes
     public void addLike(Long filmId, Long userId) {
-        filmStorage.findLikesByFilmId(filmId).add(userId);
+        filmStorage.addLike(filmId, userId);
     }
 
     public void deleteLike(Long filmId, Long userId) {
-        filmStorage.findLikesByFilmId(filmId).remove(userId);
+        filmStorage.deleteLike(filmId, userId);
     }
 
-    // Read populars
+    // read populars
     public List<Film> getMostPopular(long count) {
         return filmStorage.getMostPopular(count);
     }

@@ -18,7 +18,7 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    // reads
+    // users CRUDs
     public Collection<User> findAll() {
         return userStorage.findAll();
     }
@@ -27,7 +27,6 @@ public class UserService {
         return userStorage.findById(userId);
     }
 
-    // other CRUDs
     public User create(User user) {
         return userStorage.create(user);
     }
@@ -41,25 +40,23 @@ public class UserService {
     }
 
     // CRUDs of friendship
-    public void addFriend(Long id, Long friendId) {
-        userStorage.getFriendsRequests(id).add(friendId);
-        userStorage.getFriendsRequests(friendId).add(id);
-    }
-
     public List<User> getFriends(Long id) {
         return userStorage.getFriends(id);
     }
 
+    public List<User> getMutualFriends(Long id, Long otherId) {
+        return userStorage.getMutualFriends(id, otherId);
+    }
+
     public Set<Long> getFriendsIdes(Long id) {
-        return userStorage.getFriendsConfirmations(id);
+        return userStorage.getFriendsIdes(id);
+    }
+
+    public void addFriend(Long id, Long friendId) {
+        userStorage.addFriend(id, friendId);
     }
 
     public void deleteFriend(Long id, Long friendId) {
-        userStorage.getFriendsConfirmations(id).remove(id);
-        userStorage.getFriendsConfirmations(friendId).remove(friendId);
-    }
-
-    public List<User> getMutualFriends(Long id, Long otherId) {
-        return userStorage.getMutualFriends(id, otherId);
+        userStorage.deleteFriend(id, friendId);
     }
 }
