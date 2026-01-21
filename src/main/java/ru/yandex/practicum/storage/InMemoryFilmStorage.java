@@ -3,6 +3,7 @@ package ru.yandex.practicum.storage;
 import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.exception.NotFoundException;
@@ -12,6 +13,7 @@ import java.util.*;
 @Component
 @Getter
 @Slf4j
+@Qualifier("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> films = new HashMap<>();
 
@@ -27,12 +29,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.get(filmId);
     }
 
-    @Override
-    public Set<Long> findLikesByFilmId(Long filmId) {
-        return films.get(filmId).getLikes();
-    }
-
-    // other CRUDs
     @Override
     public Film include(@Valid @RequestBody Film film) {
         film.setId(getNextId());

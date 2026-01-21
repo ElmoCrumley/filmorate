@@ -1,6 +1,7 @@
 package ru.yandex.practicum.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.model.User;
 import ru.yandex.practicum.storage.UserStorage;
@@ -9,12 +10,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-@Service
+@Service("userService")
 public class UserService {
     private final UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 

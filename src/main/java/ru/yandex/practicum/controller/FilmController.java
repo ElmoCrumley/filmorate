@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,8 @@ public class FilmController {
     private final UserService userService;
 
     @Autowired
-    public FilmController(FilmService filmService, UserService userService) {
+    public FilmController(@Qualifier("filmService") FilmService filmService,
+                          @Qualifier("userService") UserService userService) {
         this.filmService = filmService;
         this.userService = userService;
     }
@@ -138,3 +140,4 @@ public class FilmController {
         return filmService.getMostPopular(count);
     }
 }
+
