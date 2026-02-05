@@ -4,10 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.model.Film;
+import ru.yandex.practicum.model.Genre;
+import ru.yandex.practicum.model.MotionPictureAA;
 import ru.yandex.practicum.storage.FilmStorage;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Service("filmService")
 public class FilmService {
@@ -23,7 +26,7 @@ public class FilmService {
         return filmStorage.findAll();
     }
 
-    public Film findById(Long filmId) {
+    public Optional<Film> findById(Long filmId) {
         return filmStorage.findById(filmId);
     }
 
@@ -31,11 +34,11 @@ public class FilmService {
         return filmStorage.include(film);
     }
 
-    public Film update(Film film) {
+    public Optional<Film> update(Film film) {
         return filmStorage.update(film);
     }
 
-    public Film delete(Film film) {
+    public Optional<Film> delete(Film film) {
         return filmStorage.delete(film);
     }
 
@@ -51,5 +54,23 @@ public class FilmService {
     // read populars
     public List<Film> getMostPopular(long count) {
         return filmStorage.getMostPopular(count);
+    }
+
+    // genres
+    public Collection<Genre> findAllGenres() {
+        return filmStorage.findAllGenres();
+    }
+
+    public Optional<Genre> findGenreById(Integer genreId) {
+        return filmStorage.findGenreById(genreId);
+    }
+
+    // mpa's
+    public Collection<MotionPictureAA> findAllMPAs() {
+        return filmStorage.findAllMPAs();
+    }
+
+    public Optional<MotionPictureAA> findMPAById(Integer mpaId) {
+        return filmStorage.findMPAById(mpaId);
     }
 }
