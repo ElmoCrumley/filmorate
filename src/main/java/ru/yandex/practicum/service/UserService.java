@@ -8,6 +8,7 @@ import ru.yandex.practicum.storage.UserStorage;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service("userService")
@@ -24,7 +25,7 @@ public class UserService {
         return userStorage.findAll();
     }
 
-    public User findById(Long userId) {
+    public Optional<User> findById(Long userId) {
         return userStorage.findById(userId);
     }
 
@@ -32,7 +33,7 @@ public class UserService {
         return userStorage.create(user);
     }
 
-    public User update(User user) {
+    public Optional<User> update(User user) {
         return userStorage.update(user);
     }
 
