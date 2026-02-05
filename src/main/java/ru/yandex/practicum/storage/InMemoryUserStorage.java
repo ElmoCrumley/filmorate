@@ -24,8 +24,8 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User findById(Long userId) {
-        return users.get(userId);
+    public Optional<User> findById(Long userId) {
+        return Optional.of(users.get(userId));
     }
 
     @Override
@@ -38,7 +38,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User update(User user) {
+    public Optional<User> update(User user) {
         Long userId = user.getId();
         log.trace("method * update(), Field userId has been created");
 
@@ -53,7 +53,7 @@ public class InMemoryUserStorage implements UserStorage {
             log.trace("method * update(), Set the name");
             oldUser.setEmail(user.getEmail());
             log.trace("method * update(), Set the email");
-            return oldUser;
+            return Optional.of(oldUser);
         }
 
         log.error("method * update(), User with this ID is not found");

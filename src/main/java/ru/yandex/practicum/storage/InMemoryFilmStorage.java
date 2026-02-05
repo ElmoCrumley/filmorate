@@ -1,13 +1,14 @@
 package ru.yandex.practicum.storage;
 
-import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.model.Film;
+import ru.yandex.practicum.model.Genre;
+import ru.yandex.practicum.model.MotionPictureAA;
+
 import java.util.*;
 
 @Component
@@ -25,12 +26,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film findById(Long filmId) {
-        return films.get(filmId);
+    public Optional<Film> findById(Long filmId) {
+        return Optional.of(films.get(filmId));
     }
 
     @Override
-    public Film include(@Valid @RequestBody Film film) {
+    public Film include(Film film) {
         film.setId(getNextId());
         log.trace("method * include(), Set an ID");
         films.put(film.getId(), film);
@@ -39,7 +40,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film update(@Valid @RequestBody Film film) {
+    public Optional<Film> update(Film film) {
         Long filmId = film.getId();
         log.trace("method * update(), Field filmId has been created");
 
@@ -49,13 +50,13 @@ public class InMemoryFilmStorage implements FilmStorage {
 
             oldFilm.setReleaseDate(film.getReleaseDate());
             log.trace("method * update(), Set the release date");
-            oldFilm.setTitle(film.getTitle());
+            oldFilm.setName(film.getName());
             log.trace("method * update(), Set the name");
             oldFilm.setDuration(film.getDuration());
             log.trace("method * update(), Set the duration");
             oldFilm.setDescription(film.getDescription());
             log.trace("method * update(), Set the description");
-            return oldFilm;
+            return Optional.of(oldFilm);
         }
 
         log.error("method * update(), Film with this ID is not found");
@@ -63,9 +64,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film delete(@Valid @RequestBody Film film) {
+    public Optional<Film> delete(Film film) {
         films.remove(film.getId());
-        return new Film();
+        return Optional.of(new Film());
     }
 
     // CRUDs of likes
@@ -91,6 +92,28 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .sorted(new LikesComparator())
                 .limit(count)
                 .toList();
+    }
+
+    // genres
+    @Override
+    public Collection<Genre> findAllGenres() {
+        return List.of();
+    }
+
+    @Override
+    public Optional<Genre> findGenreById(Integer genreId) {
+        return Optional.empty();
+    }
+
+    // mpa's
+    @Override
+    public Collection<MotionPictureAA> findAllMPAs() {
+        return List.of();
+    }
+
+    @Override
+    public Optional<MotionPictureAA> findMPAById(Integer mpaId) {
+        return Optional.empty();
     }
 
     public static class LikesComparator implements Comparator<Film> {
