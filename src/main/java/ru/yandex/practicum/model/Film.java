@@ -18,7 +18,7 @@ public class Film {
     Long id;
     @NotNull
     @NotBlank
-    String title;
+    String name;
     String description;
     @NotNull
     LocalDate releaseDate;
@@ -26,9 +26,6 @@ public class Film {
     int duration;
     @JsonIgnore
     Set<Long> likes = new HashSet<>();
-    @JsonIgnore
-    Set<Long> genre = new HashSet<>();
-    @NotNull
-    @NotBlank
-    String motionPictureAssociation;
+    MotionPictureAA mpa;
+    Set<Genre> genres = new HashSet<>();
 }
