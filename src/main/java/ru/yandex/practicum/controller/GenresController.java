@@ -36,7 +36,6 @@ public class GenresController {
     @GetMapping("/{genreId}")
     public Optional<Genre> findGenreById(@PathVariable("genreId") int genreId) {
         log.info("[Calling GenresController findGenreById()]");
-
         if (genreId < 0 || genreId > 6) {
             throw new NotFoundException("not in range 1 to 6");
         }

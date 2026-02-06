@@ -39,7 +39,6 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public User create(@Valid @RequestBody User user) {
-        // validation
         log.debug("* Validation * UserController * create()");
         if (user.getLogin().contains(" ")) {
             throw new ValidationException("Логин не может содержать пробелы");
@@ -61,7 +60,6 @@ public class UserController {
 
     @PutMapping
     public Optional<User> update(@Valid @RequestBody User user) {
-        // validation
         log.debug("* Validation * UserController * update()");
         if (user.getId() == null) {
             throw new NullPointerException("Id должен быть указан");
@@ -84,7 +82,6 @@ public class UserController {
             @PathVariable Long id,
             @PathVariable Long friendId
     ) {
-        // validation
         log.debug("* Validation * UserController * addFriend()");
         if (userService.findById(id).isEmpty()) {
             throw new NotFoundException("User is not found");
@@ -107,7 +104,6 @@ public class UserController {
             @PathVariable Long id,
             @PathVariable Long friendId
     ) {
-        // validation
         log.debug("* Validation * UserController * deleteFriend()");
         if (userService.findById(id).isEmpty()) {
             throw new NotFoundException("User is not found");
@@ -122,7 +118,6 @@ public class UserController {
     public List<User> getFriends(
             @PathVariable Long id
     ) {
-        //validation
         log.debug("* Validation * UserController * getFriends()");
         if (userService.findById(id).isEmpty()) {
             throw new NotFoundException("User is not found");

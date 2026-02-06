@@ -36,7 +36,6 @@ public class MPAController {
     @GetMapping("/{mpaId}")
     public Optional<MotionPictureAA> findMPAById(@PathVariable("mpaId") Integer mpaId) {
         log.info("[Calling MPAController findMPAById()]");
-
         if (mpaId < 0 || mpaId > 5) {
             throw new NotFoundException("not in range 1 to 5");
         }

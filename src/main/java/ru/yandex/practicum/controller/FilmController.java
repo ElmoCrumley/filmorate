@@ -51,8 +51,6 @@ public class FilmController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Film include(@Valid @RequestBody Film film) {
-
-        //validation
         log.debug("[Validation FilmController include()]");
         if (film.getDescription().length() > 200) {
             throw new ValidationException("Максимальная длина описания — 200 символов");
@@ -70,8 +68,6 @@ public class FilmController {
 
     @PutMapping
     public Optional<Film> update(@Valid @RequestBody Film film) {
-
-        //validation
         log.debug("[Validation FilmController update()]");
         if (film.getId() == null) {
             throw new NullPointerException("ID должен быть указан");
@@ -95,8 +91,6 @@ public class FilmController {
             @PathVariable("id") Long filmId,
             @PathVariable("userId") Long userId
     ) {
-
-        //validation
         log.debug("[Validation FilmController addLike()]");
         if (filmService.findById(filmId).isEmpty()) {
             throw new NotFoundException("Film is not found");
@@ -116,8 +110,6 @@ public class FilmController {
             @PathVariable("id") Long filmId,
             @PathVariable("userId") Long userId
     ) {
-
-        //validation
         log.debug("[Validation FilmController deleteLike()]");
         if (filmService.findById(filmId).isEmpty()) {
             throw new NotFoundException("Film is not found");
