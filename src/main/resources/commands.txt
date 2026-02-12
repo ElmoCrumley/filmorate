@@ -76,3 +76,8 @@ SELECT f.id, f.name, f.description, f.releaseDate, f.duration, g.id AS genre_id,
             LEFT JOIN genre g ON fg.genre_id = g.id
             LEFT JOIN films_motion_picture_aa fm ON f.id = fm.film_id
             LEFT JOIN motion_picture_aa m ON fm.motion_picture_aa_id = m.id
+
+
+            SELECT f.id, f.name, f.description, f.releaseDate f.duration FROM films f
+            WHERE f.id IN (SELECT film_id FROM users_likes GROUP BY film_id ORDER BY COUNT(user_id) DESC LIMIT ?)
+            ORDER BY (SELECT COUNT(user_id) FROM users_likes ul WHERE ul.film_id = f.id) DESC
