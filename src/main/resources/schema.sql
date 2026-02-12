@@ -7,14 +7,14 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS friendshipRequests (
-    user_id BIGINT NOT NULL REFERENCES users(id),
-    requested_id BIGINT NOT NULL REFERENCES users(id),
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    requested_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, requested_id)
 );
 
 CREATE TABLE IF NOT EXISTS friendshipConfirmed (
-    user_id BIGINT NOT NULL REFERENCES users(id),
-    confirmed_friend_id BIGINT NOT NULL REFERENCES users(id),
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    confirmed_friend_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, confirmed_friend_id)
 );
 
