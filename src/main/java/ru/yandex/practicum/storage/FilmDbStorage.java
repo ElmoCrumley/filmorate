@@ -3,6 +3,7 @@ package ru.yandex.practicum.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -13,6 +14,7 @@ import ru.yandex.practicum.model.Genre;
 import ru.yandex.practicum.model.MotionPictureAA;
 import ru.yandex.practicum.storage.mappers.FilmRowMapper;
 import ru.yandex.practicum.storage.mappers.GenreRowMapper;
+import ru.yandex.practicum.storage.mappers.LikesMapper;
 import ru.yandex.practicum.storage.mappers.MpasRowMapper;
 
 import java.sql.PreparedStatement;
@@ -30,6 +32,7 @@ public class FilmDbStorage implements FilmStorage {
     private final FilmRowMapper filmRowMapper;
     private final GenreRowMapper genreRowMapper;
     private final MpasRowMapper mpasRowMapper;
+    private final LikesMapper likesMapper;
     // tables
     private static final String TABLE_FILMS = "films";
     private static final String TABLE_LIKES = "users_likes";
@@ -47,26 +50,24 @@ public class FilmDbStorage implements FilmStorage {
             "LEFT JOIN genre g ON fg.genre_id = g.id ";
     private static final String FIND_ALL_GENRES_QUERY = "SELECT * FROM genre";
     private static final String FIND_ALL_MPAS_QUERY = "SELECT * FROM motion_picture_aa";
-    private static final String FIND_BY_ID_QUERY = "SELECT f.id, f.name, f.description, f.releaseDate, f.duration, " +
-            "g.id AS genre_id, g.name AS genre_name, m.id AS mpa_id, m.name AS mpa_name " +
-            "FROM films f " +
-            "LEFT JOIN films_motion_picture_aa fm ON f.id = fm.film_id " +
-            "LEFT JOIN motion_picture_aa m ON fm.motion_picture_aa_id = m.id " +
-            "LEFT JOIN films_genre fg ON f.id = fg.film_id " +
-            "LEFT JOIN genre g ON fg.genre_id = g.id " +
-            "WHERE f.id = ?";
+    private static final String FIND_BY_ID_QUERY = "SELECT * FROM films WHERE id = ?";
+    private static final String FIND_FILMS_MPA_QUERY = "select mpaa.id as id, mpaa.name as name " +
+            "from films_motion_picture_aa fmpaa " +
+            "left join motion_picture_aa mpaa on fmpaa.motion_picture_aa_id = mpaa.id " +
+            "where fmpaa.film_id = ?";
+    private static final String FIND_FILMS_GENRES_QUERY = "select g.id as id, g.name as name " +
+            "from films_genre fg " +
+            "left join genre g on fg.genre_id = g.id " +
+            "where fg.film_id = ?";
+    private static final String FIND_FILMS_LIKES_QUERY = "select ul.user_id as id " +
+            "from users_likes ul where ul.film_id = ?";
     private static final String FIND_MPA_NAME_QUERY = "SELECT name FROM " + TABLE_MOTION_PICTURE_ASSOCIATION +
             " WHERE id = ?";
     private static final String FIND_BY_ID_GENRE_QUERY = "SELECT * FROM genre WHERE id = ?";
     private static final String FIND_BY_ID_MPAS_QUERY = "SELECT * FROM motion_picture_aa WHERE id = ?";
     private static final String FIND_GENRES_NAME_QUERY = "SELECT name FROM " + TABLE_GENRE + " WHERE id = ?";
     private static final String FIND_MOST_POPULAR_QUERY = "SELECT f.id, f.name, f.description, f.releaseDate, " +
-            "f.duration, g.id AS genre_id, g.name AS genre_name, m.id AS mpa_id, m.name AS mpa_name " +
-            "FROM films f " +
-            "LEFT JOIN films_motion_picture_aa fm ON f.id = fm.film_id " +
-            "LEFT JOIN motion_picture_aa m ON fm.motion_picture_aa_id = m.id " +
-            "LEFT JOIN films_genre fg ON f.id = fg.film_id " +
-            "LEFT JOIN genre g ON fg.genre_id = g.id " +
+            "f.duration FROM films f " +
             "WHERE f.id IN (SELECT film_id FROM users_likes GROUP BY film_id ORDER BY COUNT(user_id) DESC LIMIT ?) " +
             "ORDER BY (SELECT COUNT(user_id) FROM users_likes ul WHERE ul.film_id = f.id) DESC";
     private static final String INSERT_FILM_QUERY = "INSERT INTO " + TABLE_FILMS +
@@ -88,13 +89,15 @@ public class FilmDbStorage implements FilmStorage {
 
     @Autowired
     public FilmDbStorage(JdbcTemplate jdbc,
-                         FilmRowMapper filmRowMapper,
                          GenreRowMapper genreRowMapper,
-                         MpasRowMapper mpasRowMapper) {
+                         MpasRowMapper mpasRowMapper,
+                         FilmRowMapper filmRowMapper,
+                         LikesMapper likesmapper) {
         this.jdbc = jdbc;
-        this.filmRowMapper = filmRowMapper;
         this.genreRowMapper = genreRowMapper;
         this.mpasRowMapper = mpasRowMapper;
+        this.filmRowMapper = filmRowMapper;
+        this.likesMapper = likesmapper;
     }
 
     // films CRUDs
@@ -122,15 +125,30 @@ public class FilmDbStorage implements FilmStorage {
         log.info("------------- * Start / Finish * FilmDbStorage * findById() -------------");
 
         try {
-            List<Film> films = jdbc.query(FIND_BY_ID_QUERY, filmRowMapper, id);
+            Film film = jdbc.queryForObject(FIND_BY_ID_QUERY, filmRowMapper, id);
 
-            if (films.isEmpty()) {
-                return Optional.empty();
+            if (film != null && film.getId() != null) {
+                try {
+                    MotionPictureAA mpa = jdbc.queryForObject(FIND_FILMS_MPA_QUERY, mpasRowMapper, id);
+
+                    film.setMpa(mpa);
+                } catch (EmptyResultDataAccessException e) {
+                    film.setMpa(null);
+                }
+
+                Set<Genre> genres = new HashSet<>(jdbc.query(FIND_FILMS_GENRES_QUERY, genreRowMapper, id));
+
+                film.setGenres(genres);
+
+                Set<Long> likes = new HashSet<>(jdbc.query(FIND_FILMS_LIKES_QUERY, likesMapper, id));
+
+                film.setLikes(likes);
+                return Optional.of(film);
             } else {
-                return Optional.of(films.get(0));
+                return Optional.empty();
             }
-        } catch (DataAccessException e) {
-            throw new NotFoundException("film is not found");
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
         }
     }
 
@@ -140,98 +158,43 @@ public class FilmDbStorage implements FilmStorage {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbc.update(connection -> {
-            // film
-            PreparedStatement stmtInsertFilm = connection.prepareStatement(INSERT_FILM_QUERY,
-                    Statement.RETURN_GENERATED_KEYS);
-
-            stmtInsertFilm.setString(1, film.getName());
-            stmtInsertFilm.setString(2, film.getDescription());
-
+            PreparedStatement ps = connection.prepareStatement(INSERT_FILM_QUERY, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, film.getName());
+            ps.setString(2, film.getDescription());
             LocalDateTime releaseDate = film.getReleaseDate().atStartOfDay();
-
-            stmtInsertFilm.setObject(3, releaseDate);
-            stmtInsertFilm.setInt(4, film.getDuration());
-            stmtInsertFilm.executeUpdate();
-
-            ResultSet generatedKeys = stmtInsertFilm.getGeneratedKeys();
-
-            if (generatedKeys.next()) {
-                Long generatedId = generatedKeys.getLong(1);
-                film.setId(generatedId);
-            }
-
-            log.info("* Info * FilmDbStorage * include() --- stmtInsertFilm --- {}", film);
-
-            // mpa
-            if (film.getMpa() != null) {
-                int mpaId = film.getMpa().getId();
-
-                MotionPictureAA mpa = film.getMpa();
-
-                log.info("* SQL * FilmDbStorage * include() --- stmtFindMpa --- {}", mpa);
-
-                PreparedStatement stmtFindMpa = connection.prepareStatement(FIND_MPA_NAME_QUERY);
-
-                stmtFindMpa.setInt(1, mpaId);
-
-                ResultSet rs = stmtFindMpa.executeQuery();
-
-                if (rs.next()) {
-                    mpa.setName(rs.getString("name"));
-                } else {
-                    throw new NotFoundException("Mpa`s id is not found");
-                }
-
-                log.info("* SQL * FilmDbStorage * include() --- stmtInsertMpa --- {}", film);
-
-                PreparedStatement stmtInsertMpa = connection.prepareStatement(INSERT_FILMS_MPA_QUERY);
-
-                stmtInsertMpa.setLong(1, film.getId());
-                stmtInsertMpa.setInt(2, mpaId);
-                stmtInsertMpa.executeUpdate();
-                log.info("* Info * FilmDbStorage * include() -- stmtInsertMpa {}", mpa);
-            }
-
-            // genres
-            if (film.getGenres().isEmpty()) {
-                film.setGenres(new HashSet<>());
-            } else {
-                Set<Genre> genres = film.getGenres();
-
-                log.info("* SQL * FilmDbStorage * include() --- stmtFindGenres --- {}", genres);
-
-                PreparedStatement stmtFindGenre = connection.prepareStatement(FIND_GENRES_NAME_QUERY);
-                PreparedStatement stmtInsertGenre = connection.prepareStatement(INSERT_FILMS_GENRE_QUERY);
-
-                for (Genre genre : genres) {
-                    stmtFindGenre.setInt(1, genre.getId());
-
-                    ResultSet rs = stmtFindGenre.executeQuery();
-
-                    if (rs.next()) {
-                        genre.setName(rs.getString("name"));
-                    } else {
-                        throw new NotFoundException("Genre id is not found");
-                    }
-
-                    stmtInsertGenre.setLong(1, film.getId());
-                    stmtInsertGenre.setInt(2, genre.getId());
-                    stmtInsertGenre.executeUpdate();
-                }
-
-                log.info("* Info * FilmDbStorage, method include(), Genres = {}", genres);
-            }
-
-            return stmtInsertFilm;
+            ps.setObject(3, releaseDate);
+            ps.setInt(4, film.getDuration());
+            return ps;
         }, keyHolder);
 
-        Long generatedId = keyHolder.getKey() != null ? keyHolder.getKey().longValue() : null;
+        Long filmId = keyHolder.getKey() != null ? keyHolder.getKey().longValue() : null;
 
-        if (generatedId == null) {
-            throw new NotFoundException(" FilmDbStorage, include(), id = null");
+        if (filmId == null) {
+            throw new NotFoundException("id is not found");
         }
 
-        log.info("------------- * Finish * FilmDbStorage * include() -------------");
+        film.setId(filmId);
+
+        if (film.getMpa() != null) {
+            int mpaId = film.getMpa().getId();
+            if (mpaId > 0 && mpaId < 6) {
+                jdbc.update(INSERT_FILMS_MPA_QUERY, filmId, film.getMpa().getId());
+            } else {
+                throw new NotFoundException("mpa id is not found");
+            }
+        }
+
+        if (!film.getGenres().isEmpty()) {
+            for (Genre genre : film.getGenres()) {
+                int genreId = genre.getId();
+                if (genreId > 0 && genreId < 7) {
+                    jdbc.update(INSERT_FILMS_GENRE_QUERY, filmId, genre.getId());
+                } else {
+                    throw new NotFoundException("genre id is not found");
+                }
+            }
+        }
+
         return film;
     }
 
@@ -307,8 +270,6 @@ public class FilmDbStorage implements FilmStorage {
             PreparedStatement stmtFindGenre = connection.prepareStatement(FIND_GENRES_NAME_QUERY);
             PreparedStatement stmtUpdateGenres = connection.prepareStatement(UPDATE_GENRES_QUERY);
 
-//            int totalRowsUpdated = 0;
-
             for (Genre genre : genres) {
                 stmtFindGenre.setInt(1, genre.getId());
 
@@ -375,7 +336,36 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getMostPopular(long count) {
         log.info("------------- * Start / Finish * FilmDbStorage * getMostPopular() -------------");
-        return jdbc.query(FIND_MOST_POPULAR_QUERY, filmRowMapper, count);
+        List<Film> films;
+
+        try {
+            films = jdbc.query(FIND_MOST_POPULAR_QUERY, filmRowMapper, count);
+            for (Film film : films) {
+                if (film != null) {
+                    long filmId = film.getId();
+
+                    try {
+                        MotionPictureAA mpa = jdbc.queryForObject(FIND_FILMS_MPA_QUERY, mpasRowMapper, filmId);
+
+                        film.setMpa(mpa);
+                    } catch (EmptyResultDataAccessException e) {
+                        film.setMpa(null);
+                    }
+
+                    Set<Genre> genres = new HashSet<>(jdbc.query(FIND_FILMS_GENRES_QUERY, genreRowMapper, filmId));
+
+                    film.setGenres(genres);
+
+                    Set<Long> likes = new HashSet<>(jdbc.query(FIND_FILMS_LIKES_QUERY, likesMapper, filmId));
+
+                    film.setLikes(likes);
+                }
+            }
+
+        } catch (DataAccessException e) {
+            throw new NotFoundException("Films not found");
+        }
+        return films;
     }
 
     // genres
@@ -398,6 +388,7 @@ public class FilmDbStorage implements FilmStorage {
         return genres;
     }
 
+    @Override
     public Optional<Genre> findGenreById(Integer genreId) {
         log.info("------------- * Start / Finish * FilmDbStorage * findGenreById() -------------");
 
