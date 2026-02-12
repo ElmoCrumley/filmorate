@@ -87,11 +87,12 @@ public class UserDbStorage implements UserStorage {
     @Override
     public Optional<User> findById(Long userId) {
         log.info("------------- * Start / Finish * UserDbStorage * findById() -------------");
+
         try {
             List<User> users = jdbc.query(FIND_BY_ID_QUERY, userRowMapper, userId);
 
             if (users.isEmpty()) {
-                return  Optional.empty();
+                return Optional.empty();
             } else {
                 return Optional.of(users.get(0));
             }
@@ -104,11 +105,6 @@ public class UserDbStorage implements UserStorage {
     public User create(User user) {
         log.info("\n------------- * Start * UserDbStorage * create() -------------");
         KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        log.info("Email: {} * Login: {} * Name: {} * Birthday: {}",
-                user.getEmail(), user.getLogin(), user.getName(), user.getBirthday());
-        log.info("* Calling * UserDbStorage * create().update()-");
-        log.info("* SQL * UserDbStorage * create().update()- \n    " + INSERT_QUERY);
 
         try {
             jdbc.update(connection -> {
@@ -160,7 +156,11 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void delete(User user) {
         log.info("------------- * Start / Finish * UserDbStorage * delete() -------------");
-        jdbc.update(DELETE_QUERY, user.getId());
+        int rowsAffected = jdbc.update(DELETE_QUERY, user.getId());
+
+        if (rowsAffected == 0) {
+            throw new RuntimeException("Данные не удалены");
+        }
     }
 
     // CRUDs of friendship
