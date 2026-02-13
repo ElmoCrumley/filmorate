@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.exception.NotFoundException;
+import ru.yandex.practicum.exception.SQLProblemException;
 import ru.yandex.practicum.model.Film;
 import ru.yandex.practicum.model.Genre;
 import ru.yandex.practicum.model.MotionPictureAA;
@@ -157,15 +158,19 @@ public class FilmDbStorage implements FilmStorage {
         log.info("------------- * Start * FilmDbStorage * include() ------------");
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbc.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(INSERT_FILM_QUERY, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, film.getName());
-            ps.setString(2, film.getDescription());
-            LocalDateTime releaseDate = film.getReleaseDate().atStartOfDay();
-            ps.setObject(3, releaseDate);
-            ps.setInt(4, film.getDuration());
-            return ps;
-        }, keyHolder);
+        try {
+            jdbc.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(INSERT_FILM_QUERY, Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1, film.getName());
+                ps.setString(2, film.getDescription());
+                LocalDateTime releaseDate = film.getReleaseDate().atStartOfDay();
+                ps.setObject(3, releaseDate);
+                ps.setInt(4, film.getDuration());
+                return ps;
+            }, keyHolder);
+        } catch (DataAccessException e) {
+            throw new SQLProblemException("include film failed");
+        }
 
         Long filmId = keyHolder.getKey() != null ? keyHolder.getKey().longValue() : null;
 

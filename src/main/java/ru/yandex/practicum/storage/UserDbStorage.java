@@ -8,10 +8,12 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.exception.NotFoundException;
+import ru.yandex.practicum.exception.SQLProblemException;
 import ru.yandex.practicum.model.User;
 import ru.yandex.practicum.storage.mappers.UserRowMapper;
 
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -117,7 +119,7 @@ public class UserDbStorage implements UserStorage {
                 return stmt;
             }, keyHolder);
         } catch (DataAccessException e) {
-            log.error("* Exception * SQLException occurred while executing insert: {}", e.getMessage());
+            throw new SQLProblemException("insert user failed");
         }
 
         log.info("* Implementing * UserDbStorage * create()");
