@@ -108,6 +108,9 @@ public class UserController {
         if (userService.findById(id).isEmpty()) {
             throw new NotFoundException("User is not found");
         }
+        if (friendId == null) {
+            throw new NotFoundException("friendId is not found");
+        }
 
         // calling
         log.info("* Calling * UserController * deleteFriend()");
