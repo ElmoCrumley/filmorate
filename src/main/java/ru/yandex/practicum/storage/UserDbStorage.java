@@ -13,7 +13,6 @@ import ru.yandex.practicum.model.User;
 import ru.yandex.practicum.storage.mappers.UserRowMapper;
 
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.*;
