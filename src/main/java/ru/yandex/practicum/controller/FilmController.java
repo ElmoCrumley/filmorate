@@ -52,10 +52,6 @@ public class FilmController {
     @ResponseStatus(HttpStatus.CREATED)
     public Film include(@Valid @RequestBody Film film) {
         log.debug("[Validation FilmController include()]");
-        if (film.getDescription().length() > 200) {
-            throw new ValidationException("Максимальная длина описания — 200 символов");
-        }
-
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))
                 || film.getReleaseDate().isAfter(LocalDate.now())) {
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");

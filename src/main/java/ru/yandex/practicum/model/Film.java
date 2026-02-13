@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -19,6 +20,7 @@ public class Film {
     @NotNull
     @NotBlank
     String name;
+    @Size(max=200, message = "Максимальная длина описания — 200 символов")
     String description;
     @NotNull
     LocalDate releaseDate;
