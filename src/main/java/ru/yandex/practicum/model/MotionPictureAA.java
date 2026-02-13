@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MotionPictureAA {
-    int id;
+    Integer id;
     @NotNull
     @NotBlank
     String name;
