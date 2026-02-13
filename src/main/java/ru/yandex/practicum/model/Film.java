@@ -20,7 +20,7 @@ public class Film {
     @NotNull
     @NotBlank
     String name;
-    @Size(max=200, message = "Максимальная длина описания — 200 символов")
+    @Size(max = 200, message = "Максимальная длина описания — 200 символов")
     String description;
     @NotNull
     LocalDate releaseDate;
