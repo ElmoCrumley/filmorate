@@ -105,11 +105,11 @@ public class UserController {
             @PathVariable Long friendId
     ) {
         log.debug("* Validation * UserController * deleteFriend()");
-        if (userService.findById(id).isEmpty()) {
-            throw new NotFoundException("User is not found");
-        }
         if (friendId == null) {
             throw new NotFoundException("friendId is not found");
+        }
+        if (userService.findById(id).isEmpty()) {
+            throw new NotFoundException("User is not found");
         }
 
         // calling
