@@ -8,11 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.exception.NotFoundException;
-import ru.yandex.practicum.exception.ValidationException;
 import ru.yandex.practicum.model.User;
 import ru.yandex.practicum.service.UserService;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
