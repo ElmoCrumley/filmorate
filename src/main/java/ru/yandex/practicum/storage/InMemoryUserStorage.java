@@ -95,13 +95,11 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void addFriend(Long id, Long friendId) {
         getFriendsRequests(id).add(friendId);
-        getFriendsRequests(friendId).add(id);
     }
 
     @Override
     public void deleteFriend(Long id, Long friendId) {
         getFriendsIdes(id).remove(friendId);
-        getFriendsIdes(friendId).remove(id);
     }
 
     // create next ID
