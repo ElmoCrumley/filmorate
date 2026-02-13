@@ -40,17 +40,10 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public User create(@Valid @RequestBody User user) {
         log.debug("* Validation * UserController * create()");
-        if (user.getLogin().contains(" ")) {
-            throw new ValidationException("Логин не может содержать пробелы");
-        }
 
         if (user.getName() == null || user.getName().isBlank()) {
             log.info("* Calling * UserController * create().setName()");
             user.setName(user.getLogin());
-        }
-
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Дата рождения не может быть в будущем");
         }
 
         // calling

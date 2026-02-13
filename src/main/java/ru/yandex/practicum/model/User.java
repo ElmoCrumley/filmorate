@@ -1,9 +1,7 @@
 package ru.yandex.practicum.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -22,9 +20,11 @@ public class User {
     String email;
     @NotNull
     @NotBlank
+    @Pattern(regexp = "^\\S*$", message = "Логин не может содержать пробелы")
     String login;
     String name;
     @NotNull
+    @Past(message = "Дата рождения не может быть в будущем")
     LocalDate birthday;
     @JsonIgnore
     Set<Long> friendshipRequests = new HashSet<>();
