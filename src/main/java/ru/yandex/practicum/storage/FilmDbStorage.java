@@ -181,21 +181,37 @@ public class FilmDbStorage implements FilmStorage {
         film.setId(filmId);
 
         if (film.getMpa() != null) {
-            int mpaId = film.getMpa().getId();
-            if (mpaId > 0 && mpaId < 6) {
-                jdbc.update(INSERT_FILMS_MPA_QUERY, filmId, film.getMpa().getId());
-            } else {
-                throw new NotFoundException("mpa id is not found");
+            Integer id = film.getMpa().getId();
+            if (id != null) {
+                Integer existingMpaCount = jdbc.queryForObject("select count(*) " +
+                        "from motion_picture_aa where id = ?", Integer.class, id);
+                if (existingMpaCount != null && existingMpaCount > 0) {
+                    try {
+                        jdbc.update(INSERT_FILMS_MPA_QUERY, filmId, film.getMpa().getId());
+                    } catch (EmptyResultDataAccessException e) {
+                        throw new SQLProblemException("problem in INSERT_FILMS_MPA_QUERY");
+                    }
+                } else {
+                    throw new NotFoundException("mpa is not found");
+                }
             }
         }
 
         if (!film.getGenres().isEmpty()) {
             for (Genre genre : film.getGenres()) {
-                int genreId = genre.getId();
-                if (genreId > 0 && genreId < 7) {
-                    jdbc.update(INSERT_FILMS_GENRE_QUERY, filmId, genre.getId());
-                } else {
-                    throw new NotFoundException("genre id is not found");
+                Integer id = genre.getId();
+                if (id != null) {
+                    Integer existingGenreCount = jdbc.queryForObject("select count(*) " +
+                            "from genre where id = ?", Integer.class, id);
+                    if (existingGenreCount != null && existingGenreCount > 0) {
+                        try {
+                            jdbc.update(INSERT_FILMS_GENRE_QUERY, filmId, genre.getId());
+                        } catch (EmptyResultDataAccessException e) {
+                            throw new SQLProblemException("problem in INSERT_FILMS_GENRE_QUERY");
+                        }
+                    } else {
+                        throw new NotFoundException("genre is not found");
+                    }
                 }
             }
         }
