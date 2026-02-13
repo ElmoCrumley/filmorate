@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.exception.SQLProblemException;
 import ru.yandex.practicum.model.Film;
@@ -110,7 +111,7 @@ public class FilmDbStorage implements FilmStorage {
 
         List<Film> films = jdbc.query(FIND_ALL_QUERY, filmRowMapper);
 
-        if (films.isEmpty()) {
+        if (CollectionUtils.isEmpty(films)) {
             throw new NotFoundException("There are no data records in the table");
         }
 
@@ -398,7 +399,7 @@ public class FilmDbStorage implements FilmStorage {
 
         List<Genre> genres = jdbc.query(FIND_ALL_GENRES_QUERY, genreRowMapper);
 
-        if (genres.isEmpty()) {
+        if (CollectionUtils.isEmpty(genres)) {
             throw new NotFoundException("There are no data records in the table");
         }
 
@@ -431,7 +432,7 @@ public class FilmDbStorage implements FilmStorage {
 
         List<MotionPictureAA> listOfMpa = jdbc.query(FIND_ALL_MPAS_QUERY, mpasRowMapper);
 
-        if (listOfMpa.isEmpty()) {
+        if (CollectionUtils.isEmpty(listOfMpa)) {
             throw new NotFoundException("There are no data records in the table");
         }
 

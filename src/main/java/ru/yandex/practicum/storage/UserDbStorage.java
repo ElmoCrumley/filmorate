@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.exception.SQLProblemException;
 import ru.yandex.practicum.model.User;
@@ -74,7 +75,7 @@ public class UserDbStorage implements UserStorage {
 
         List<User> users = jdbc.query(FIND_ALL_QUERY, userRowMapper);
 
-        if (users.isEmpty()) {
+        if (CollectionUtils.isEmpty(users)) {
             throw new NotFoundException("There are no data records in the table");
         }
 
