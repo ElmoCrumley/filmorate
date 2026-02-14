@@ -1,50 +1,64 @@
 package ru.yandex.practicum.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.model.User;
-import ru.yandex.practicum.storage.InMemoryUserStorage;
+import ru.yandex.practicum.storage.UserStorage;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-@Service
+@Service("userService")
 public class UserService {
-
-    public InMemoryUserStorage inMemoryUserStorage;
+    private final UserStorage userStorage;
 
     @Autowired
-    public UserService(InMemoryUserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
+        this.userStorage = userStorage;
     }
 
-    public void addFriend(Long id, Long friendId) {
-        inMemoryUserStorage.getUsers().get(id).getFriendshipRequests().add(friendId);
-        inMemoryUserStorage.getUsers().get(friendId).getFriendshipRequests().add(id);
+    // users CRUDs
+    public Collection<User> findAll() {
+        return userStorage.findAll();
     }
 
-    public void deleteFriend(Long id, Long friendId) {
-        User user = inMemoryUserStorage.getUsers().get(id);
-
-        user.getFriendshipRequests().remove(friendId);
-        inMemoryUserStorage.getUsers().get(friendId).getFriendshipRequests().remove(id);
+    public Optional<User> findById(Long userId) {
+        return userStorage.findById(userId);
     }
 
+    public User create(User user) {
+        return userStorage.create(user);
+    }
+
+    public Optional<User> update(User user) {
+        return userStorage.update(user);
+    }
+
+    public void delete(User user) {
+        userStorage.delete(user);
+    }
+
+    // CRUDs of friendship
     public List<User> getFriends(Long id) {
-        Set<Long> friends = inMemoryUserStorage.getUsers().get(id).getFriendshipRequests();
-
-        return inMemoryUserStorage.getUsers().values().stream()
-                .filter(user -> friends.contains(user.getId()))
-                .toList();
+        return userStorage.getFriends(id);
     }
 
     public List<User> getMutualFriends(Long id, Long otherId) {
-        Set<Long> friends = inMemoryUserStorage.getUsers().get(id).getFriendshipRequests();
-        Set<Long> otherFriends = inMemoryUserStorage.getUsers().get(otherId).getFriendshipRequests();
+        return userStorage.getMutualFriends(id, otherId);
+    }
 
-        return inMemoryUserStorage.getUsers().values().stream()
-                .filter(user -> friends.contains(user.getId()))
-                .filter(user -> otherFriends.contains(user.getId()))
-                .toList();
+    public Set<Long> getFriendsIdes(Long id) {
+        return userStorage.getFriendsIdes(id);
+    }
+
+    public void addFriend(Long id, Long friendId) {
+        userStorage.addFriend(id, friendId);
+    }
+
+    public void deleteFriend(Long id, Long friendId) {
+        userStorage.deleteFriend(id, friendId);
     }
 }

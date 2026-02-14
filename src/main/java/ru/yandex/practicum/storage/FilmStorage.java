@@ -1,14 +1,40 @@
 package ru.yandex.practicum.storage;
 
-import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.model.Film;
+import ru.yandex.practicum.model.Genre;
+import ru.yandex.practicum.model.MotionPictureAA;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 public interface FilmStorage {
+    // films CRUDs
+    public Collection<Film> findAll();
 
-    public Film include(@Valid @RequestBody Film film);
+    public Optional<Film> findById(Long id);
 
-    public Film update(@Valid @RequestBody Film film);
+    public Film include(Film film);
 
-    public Film delete(@Valid @RequestBody Film film);
+    public Optional<Film> update(Film film);
+
+    public Optional<Film> delete(Film film);
+
+    // CRUDs of likes
+    public void addLike(Long filmId, Long userId);
+
+    public void deleteLike(Long filmId, Long userId);
+
+    // read populars
+    public List<Film> getMostPopular(long count);
+
+    // genres
+    Collection<Genre> findAllGenres();
+
+    Optional<Genre> findGenreById(Integer genreId);
+
+    // mpa's
+    Collection<MotionPictureAA> findAllMPAs();
+
+    Optional<MotionPictureAA> findMPAById(Integer mpaId);
 }

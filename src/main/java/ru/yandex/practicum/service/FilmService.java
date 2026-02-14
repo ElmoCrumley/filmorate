@@ -1,43 +1,76 @@
 package ru.yandex.practicum.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.model.Film;
-import ru.yandex.practicum.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.model.Genre;
+import ru.yandex.practicum.model.MotionPictureAA;
+import ru.yandex.practicum.storage.FilmStorage;
 
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
-@Service
+@Service("filmService")
 public class FilmService {
-
-    public InMemoryFilmStorage inMemoryFilmStorage;
+    private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage inMemoryFilmStorage) {
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
     }
 
-    public void addLike(Long id, Long userId) {
-        inMemoryFilmStorage.getFilms().get(id).getLikes().add(userId);
+    // films CRUDs
+    public Collection<Film> findAll() {
+        return filmStorage.findAll();
     }
 
-    public void deleteLike(Long id, Long userId) {
-        inMemoryFilmStorage.getFilms().get(id).getLikes().remove(userId);
+    public Optional<Film> findById(Long filmId) {
+        return filmStorage.findById(filmId);
     }
 
+    public Film include(Film film) {
+        return filmStorage.include(film);
+    }
+
+    public Optional<Film> update(Film film) {
+        return filmStorage.update(film);
+    }
+
+    public Optional<Film> delete(Film film) {
+        return filmStorage.delete(film);
+    }
+
+    // CRUDs of likes
+    public void addLike(Long filmId, Long userId) {
+        filmStorage.addLike(filmId, userId);
+    }
+
+    public void deleteLike(Long filmId, Long userId) {
+        filmStorage.deleteLike(filmId, userId);
+    }
+
+    // read populars
     public List<Film> getMostPopular(long count) {
-        return inMemoryFilmStorage.findAll()
-                .stream()
-                .sorted(new LikesComparator())
-                .limit(count)
-                .toList();
+        return filmStorage.getMostPopular(count);
     }
 
-    public static class LikesComparator implements Comparator<Film> {
-        @Override
-        public int compare(Film f1, Film f2) {
-            return Integer.compare(f2.getLikes().size(), f1.getLikes().size());
-        }
+    // genres
+    public Collection<Genre> findAllGenres() {
+        return filmStorage.findAllGenres();
+    }
+
+    public Optional<Genre> findGenreById(Integer genreId) {
+        return filmStorage.findGenreById(genreId);
+    }
+
+    // mpa's
+    public Collection<MotionPictureAA> findAllMPAs() {
+        return filmStorage.findAllMPAs();
+    }
+
+    public Optional<MotionPictureAA> findMPAById(Integer mpaId) {
+        return filmStorage.findMPAById(mpaId);
     }
 }

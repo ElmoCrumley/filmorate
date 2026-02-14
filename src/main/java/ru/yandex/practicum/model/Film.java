@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -18,7 +19,8 @@ public class Film {
     Long id;
     @NotNull
     @NotBlank
-    String title;
+    String name;
+    @Size(max = 200, message = "Максимальная длина описания — 200 символов")
     String description;
     @NotNull
     LocalDate releaseDate;
@@ -26,9 +28,6 @@ public class Film {
     int duration;
     @JsonIgnore
     Set<Long> likes = new HashSet<>();
-    @JsonIgnore
-    Set<Long> genre = new HashSet<>();
-    @NotNull
-    @NotBlank
-    String motionPictureAssociation;
+    MotionPictureAA mpa = new MotionPictureAA();
+    Set<Genre> genres = new HashSet<>();
 }

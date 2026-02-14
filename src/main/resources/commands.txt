@@ -1,0 +1,83 @@
+
+INSERT INTO users (email,login,name,birthday) values ('Crystel.Adams@gmail.com','9j2ZKOtLQv','Wilma MacGyver','1985-09-08 00:00:00');
+INSERT INTO users (email,login,name,birthday) values ('Ariel_Hansen@gmail.com','n6QTaqr5L0','Velma Olson','1992-11-08 00:00:00');
+INSERT INTO users (email,login,name,birthday) values ('Lonie.Christiansen@hotmail.com','W40UiKkmKa','Ella Macejkovic','1986-05-03 00:00:00');
+
+INSERT INTO films (name,description,releaseDate,duration) values ('GlISAPEf5fSXw4d','N93HkXi2ogs5rZayKvAGvQm3krvuEPdqwY','2000-03-09 00:00:00','122');
+INSERT INTO films (name,description,releaseDate,duration) values ('DjvSAPEf5fasSXd','LKUhLKUHlKUHLkhkjwlse23948alkjerng','1978-06-13 00:00:00','164');
+INSERT INTO films (name,description,releaseDate,duration) values ('PPUKf2jtiKFKnQ0','7eGwpj8PecvDryfuKYWU3Nh0Xr788guKul','2000-03-09 00:00:00','212');
+
+INSERT INTO users_likes (user_id, film_id) values (1,1);
+INSERT INTO users_likes (user_id, film_id) values (2,1);
+INSERT INTO users_likes (user_id, film_id) values (3,1);
+INSERT INTO users_likes (user_id, film_id) values (1,2);
+INSERT INTO users_likes (user_id, film_id) values (2,2);
+INSERT INTO users_likes (user_id, film_id) values (3,2);
+
+INSERT INTO films_genre (film_id, genre_id) values (1,1);
+INSERT INTO films_genre (film_id, genre_id) values (1,2);
+INSERT INTO films_genre (film_id, genre_id) values (1,3);
+INSERT INTO films_genre (film_id, genre_id) values (2,4);
+INSERT INTO films_genre (film_id, genre_id) values (2,5);
+INSERT INTO films_genre (film_id, genre_id) values (2,6);
+INSERT INTO films_genre (film_id, genre_id) values (3,2);
+INSERT INTO films_genre (film_id, genre_id) values (3,4);
+INSERT INTO films_genre (film_id, genre_id) values (3,6);
+INSERT INTO films_genre (film_id, genre_id) values (3,5);
+
+INSERT INTO friendshipConfirmed(user_id, confirmed_friend_id) VALUES (1, 2);
+INSERT INTO friendshipConfirmed(user_id, confirmed_friend_id) VALUES (1, 3);
+INSERT INTO friendshipConfirmed(user_id, confirmed_friend_id) VALUES (2, 1);
+INSERT INTO friendshipConfirmed(user_id, confirmed_friend_id) VALUES (2, 3);
+
+INSERT INTO films_motion_picture_aa(film_id, motion_picture_aa_id) VALUES (1, 3);
+INSERT INTO films_motion_picture_aa(film_id, motion_picture_aa_id) VALUES (1, 4);
+INSERT INTO films_motion_picture_aa(film_id, motion_picture_aa_id) VALUES (1, 5);
+
+SELECT f.ID,f.NAME,f.DESCRIPTION,f.RELEASEDATE,f.DURATION,g.ID,g.NAME
+FROM films f
+LEFT JOIN films_genre fg ON f.id = fg.film_id
+LEFT JOIN genre g ON fg.genre_id = g.id
+WHERE f.id IN (
+    SELECT film_id
+    FROM users_likes
+    GROUP BY film_id
+    ORDER BY COUNT(user_id) DESC
+LIMIT 3);
+
+SELECT f.id, f.name, " +
+            "f.description, f.releaseDate, f.duration, g.id AS genre_id, g.name AS genre_name " +
+            "FROM films f " +
+            "LEFT JOIN films_genre fg ON f.id = fg.film_id " +
+            "LEFT JOIN genre g ON fg.genre_id = g.id " +
+            "WHERE f.id IN (SELECT film_id FROM users_likes GROUP BY film_id ORDER BY COUNT(user_id) DESC LIMIT = ?)
+
+
+SELECT f.id, f.name,
+            f.description, f.releaseDate, f.duration, g.id AS genre_id, g.name AS genre_name
+            FROM films f
+            LEFT JOIN films_genre fg ON f.id = fg.film_id
+            LEFT JOIN genre g ON fg.genre_id = g.id
+            WHERE f.id IN (SELECT film_id FROM users_likes GROUP BY film_id ORDER BY COUNT(user_id) DESC LIMIT 3)
+
+
+SELECT u.id, u.email, u.login, u.name, u.birthday,
+            fc.confirmed_friend_id
+            FROM users u
+            LEFT JOIN friendshipConfirmed fc ON u.id = fc.user_id
+            JOIN friendshipConfirmed f1 ON u.id = f1.confirmed_friend_id
+            JOIN friendshipConfirmed f2 ON u.id = f2.confirmed_friend_id
+            WHERE f1.user_id = 1
+            AND f2.user_id = 2
+
+SELECT f.id, f.name, f.description, f.releaseDate, f.duration, g.id AS genre_id, g.name AS genre_name, m.id AS mpa_id, m.name AS mpa_name
+            FROM films f
+            LEFT JOIN films_genre fg ON f.id = fg.film_id
+            LEFT JOIN genre g ON fg.genre_id = g.id
+            LEFT JOIN films_motion_picture_aa fm ON f.id = fm.film_id
+            LEFT JOIN motion_picture_aa m ON fm.motion_picture_aa_id = m.id
+
+
+            SELECT f.id, f.name, f.description, f.releaseDate f.duration FROM films f
+            WHERE f.id IN (SELECT film_id FROM users_likes GROUP BY film_id ORDER BY COUNT(user_id) DESC LIMIT ?)
+            ORDER BY (SELECT COUNT(user_id) FROM users_likes ul WHERE ul.film_id = f.id) DESC

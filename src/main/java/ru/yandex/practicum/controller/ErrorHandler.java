@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.exception.ValidationException;
 
+import java.sql.SQLException;
+
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
@@ -16,28 +18,35 @@ public class ErrorHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationArgumentsException(Exception e) {
-        log.error("* Exception *, " + "Method argument isn't valid");
-        return new ErrorResponse("* Exception *" + "Method argument isn't valid");
+        log.error("* Exception * " + "Method argument isn't valid");
+        return new ErrorResponse("* Exception * " + "Method argument isn't valid");
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(ValidationException e) {
-        log.error("* ValidationException *, {}", e.getMessage());
-        return new ErrorResponse("* Exception *" + e.getMessage());
+        log.error("* ValidationException * {}", e.getMessage());
+        return new ErrorResponse("* Exception * " + e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(NotFoundException e) {
-        log.error("* NotFoundException *, {}", e.getMessage());
-        return new ErrorResponse("* Exception *" + e.getMessage());
+        log.error("* NotFoundException * {}", e.getMessage());
+        return new ErrorResponse("* Exception * " + e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(Throwable e) {
-        log.error("* Throwable *, {}", e.getMessage());
-        return new ErrorResponse("* Exception *" + "Произошла непредвиденная ошибка.");
+        log.error("* Throwable * {}", e.getMessage());
+        return new ErrorResponse("* Exception * " + "Произошла непредвиденная ошибка.");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleThrowable(SQLException e) {
+        log.error("* SQLException * {}", e.getMessage());
+        return new ErrorResponse("* Exception * " + e.getMessage());
     }
 }
